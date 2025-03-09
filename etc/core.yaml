@@ -3,19 +3,27 @@ Host: 0.0.0.0
 Port: 8120
 Timeout: 2000
 
-Auth:
-  AccessSecret: # the same as core
-  AccessExpire: 259200
+#Auth:
+#  AccessSecret: # the same as core
+#  AccessExpire: 259200
 
 RedisConf:
   Host: 127.0.0.1:6379 #
   Type: node
   Pass: RedisContainer@202409  # 密码
 
+ZormConf:
+  MainSource:
+    Type: mysql
+    Host: "127.0.0.1"
+    Port: 3306
+    DBName: stock # 数据库名称
+    Username: root # 用户名
+    Password: "DockerMariaDB@2024" # 密码
 
 Log:
   ServiceName: TaskApiLogger
-  Mode: file
+  Mode: console #file
   Path: ../../logs/Task/api
   Level: info
   Compress: false

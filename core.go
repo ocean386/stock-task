@@ -1,49 +1,43 @@
-//	stocktask
-//
-//	Description: stocktask service
-//
-//	Schemes: http, https
-//	Host: localhost:9100
-//	BasePath: /
-//	Version: 0.0.1
-//	SecurityDefinitions:
-//	  Token:
-//	    type: apiKey
-//	    name: Authorization
-//	    in: header
-//	Security:
-//	  Token:
-//	Consumes:
-//	  - application/json
-//
-//	Produces:
-//	  - application/json
-//
-// swagger:meta
 package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/dcron-contrib/redisdriver"
 	"github.com/libi/dcron"
 	"github.com/ocean386/stock-task/internal/config"
 	"github.com/ocean386/stock-task/internal/handler"
 	"github.com/ocean386/stock-task/internal/logic/task"
+	"github.com/ocean386/stock-task/internal/nacos"
 	"github.com/ocean386/stock-task/internal/svc"
 	"github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
 	"time"
 )
 
-var configFile = flag.String("f", "etc/core.yaml", "the config file")
+var (
+	nacosDataId = "stocktask" // 配置 Data ID
+	nacosGroup  = "DEV"       // 配置组名
+)
 
+// 服务启动参数[编辑配置-环境]: NACOS_USERNAME=nacos;NACOS_PASSWORD=OKNacos;NACOS_IP=127.0.0.1
 func main() {
 	flag.Parse()
 
+	// 加载yaml配置信息-naocs
+	strNacosCfg, err := nacos.GetConfigFromNacos(nacosDataId, nacosGroup)
+	if err != nil {
+		logx.Errorf("Failed to get config from Nacos: %v", err)
+		return
+	}
+
+	// 将 Nacos 配置内容加载到结构体中
 	var cfg config.Config
-	conf.MustLoad(*configFile, &cfg, conf.UseEnv())
+	if err = conf.LoadFromYamlBytes([]byte(strNacosCfg), &cfg); err != nil {
+		logx.Errorf("Failed to load config: %v", err)
+		return
+	}
 
 	server := rest.MustNewServer(cfg.RestConf, rest.WithCors("*"))
 	defer server.Stop()
@@ -53,8 +47,7 @@ func main() {
 		Password: cfg.RedisConf.Pass,
 	})
 
-	ctx := svc.NewServiceContext(cfg)
-
+	ServiceCtx := svc.NewServiceContext(cfg)
 	redisDriver := redisdriver.NewDriver(redisClient)
 	dCron := dcron.NewDcronWithOption("DCronServer", redisDriver,
 		dcron.WithHashReplicas(10),
@@ -65,8 +58,8 @@ func main() {
 	dCron.AddFunc("StockHTTP", "*/5 * * * * *", task.StockTask)
 
 	go dCron.Start()
-	handler.RegisterHandlers(server, ctx)
+	handler.RegisterHandlers(server, ServiceCtx)
 
-	fmt.Printf("Starting server at %s:%d...\n", cfg.Host, cfg.Port)
+	logx.Infof("Starting API Server [%s:%d]", cfg.Host, cfg.Port)
 	server.Start()
 }

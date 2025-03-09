@@ -1,10 +1,10 @@
 package task
 
 import (
-	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 	"time"
 )
 
 func StockTask() {
-	fmt.Printf("执行 StockHTTP 任务:%v\n", time.Now().Format("15:04:05"))
+	logx.Infof("执行 StockHTTP 任务:%v", time.Now().Format("15:04:05"))
 }
