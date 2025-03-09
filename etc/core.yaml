@@ -7,6 +7,12 @@ Auth:
   AccessSecret: # the same as core
   AccessExpire: 259200
 
+RedisConf:
+  Host: 127.0.0.1:6379 #
+  Type: node
+  Pass: RedisContainer@202409  # 密码
+
+
 Log:
   ServiceName: TaskApiLogger
   Mode: file
