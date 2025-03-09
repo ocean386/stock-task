@@ -1,0 +1,21 @@
+Name: Task.api
+Host: 0.0.0.0
+Port: 8120
+Timeout: 2000
+
+Auth:
+  AccessSecret: # the same as core
+  AccessExpire: 259200
+
+Log:
+  ServiceName: TaskApiLogger
+  Mode: file
+  Path: ../../logs/Task/api
+  Level: info
+  Compress: false
+  Encoding: json
+  KeepDays: 7
+  StackCoolDownMillis: 100
+
+
+
