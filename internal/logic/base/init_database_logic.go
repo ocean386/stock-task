@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"time"
 
 	"github.com/ocean386/stock-task/internal/svc"
 	"github.com/ocean386/stock-task/internal/types"
@@ -23,7 +24,32 @@ func NewInitDatabaseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Init
 }
 
 func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) {
-	// todo: add your logic here and delete this line
+
+	logx.Infof("执行 InitDatabase 任务:%v", time.Now().Format("15:04:05"))
+
+	resp = &types.BaseMsgResp{}
+
+	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
+	if err != nil {
+		logx.Errorf("Failed to check Redis key existence: %v", err)
+		resp.Code = 500
+		resp.Msg = "Failed to check Redis key existence"
+		return resp, err
+	}
+
+	if !exists {
+		err = l.svcCtx.Redis.SetexCtx(l.ctx, "StockInit", "1", 3600)
+		if err != nil {
+			logx.Errorf("Failed to set Redis key: %v", err)
+			resp.Code = 500
+			resp.Msg = "Failed to set Redis key"
+			return resp, err
+		}
+		go StockTask()
+	}
+
+	resp.Code = 200
+	resp.Msg = "Success"
 
 	return
 }

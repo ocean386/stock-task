@@ -16,6 +16,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
@@ -25,6 +26,10 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/karlseguin/ccache/v3 v3.0.5 // indirect
 	github.com/longbridgeapp/sqlparser v0.3.1 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
+	github.com/tealeg/xlsx v1.0.5 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.58.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect

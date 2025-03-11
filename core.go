@@ -6,7 +6,6 @@ import (
 	"github.com/libi/dcron"
 	"github.com/ocean386/stock-task/internal/config"
 	"github.com/ocean386/stock-task/internal/handler"
-	"github.com/ocean386/stock-task/internal/logic/task"
 	"github.com/ocean386/stock-task/internal/nacos"
 	"github.com/ocean386/stock-task/internal/svc"
 	"github.com/redis/go-redis/v9"
@@ -47,7 +46,7 @@ func main() {
 		Password: cfg.RedisConf.Pass,
 	})
 
-	ServiceCtx := svc.NewServiceContext(cfg)
+	svcCtx := svc.NewServiceContext(cfg)
 	redisDriver := redisdriver.NewDriver(redisClient)
 	dCron := dcron.NewDcronWithOption("DCronServer", redisDriver,
 		dcron.WithHashReplicas(10),
@@ -55,10 +54,12 @@ func main() {
 		dcron.CronOptionSeconds(),
 	)
 
-	dCron.AddFunc("StockHTTP", "*/5 * * * * *", task.StockTask)
+	//dCron.AddFunc("StockHTTP", "00 07 18 * * *", func() {
+	//	task.IsStockNew()
+	//})
 
 	go dCron.Start()
-	handler.RegisterHandlers(server, ServiceCtx)
+	handler.RegisterHandlers(server, svcCtx)
 
 	logx.Infof("Starting API Server [%s:%d]", cfg.Host, cfg.Port)
 	server.Start()

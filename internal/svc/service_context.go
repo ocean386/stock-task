@@ -5,10 +5,11 @@ import (
 	"github.com/ocean386/common/gormcache/cache"
 	"github.com/ocean386/common/gormcache/config"
 	"github.com/ocean386/common/gormcache/storage"
-	"github.com/ocean386/common/orm/dao"
 	"github.com/ocean386/common/snowflake"
 	"github.com/ocean386/common/zorm"
 	stockCfg "github.com/ocean386/stock-task/internal/config"
+	//"github.com/ocean386/common/orm/dao"
+	"github.com/ocean386/stock-task/internal/orm/dao"
 	zeroRedis "github.com/zeromicro/go-zero/core/stores/redis"
 	"gorm.io/gorm"
 )
