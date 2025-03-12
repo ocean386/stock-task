@@ -100,5 +100,4 @@ func StockDateUpdate() {
 		}
 		logx.Infof("[A股交易日期] 交易日期 %s, 时间戳:%d", tradeDate, timestamp)
 	}
-
 }

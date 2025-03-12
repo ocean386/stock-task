@@ -16,39 +16,44 @@ import (
 )
 
 var (
-	Q         = new(Query)
-	Stock     *stock
-	StockDate *stockDate
+	Q                = new(Query)
+	Stock            *stock
+	StockDailyMarket *stockDailyMarket
+	StockDate        *stockDate
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Stock = &Q.Stock
+	StockDailyMarket = &Q.StockDailyMarket
 	StockDate = &Q.StockDate
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:        db,
-		Stock:     newStock(db, opts...),
-		StockDate: newStockDate(db, opts...),
+		db:               db,
+		Stock:            newStock(db, opts...),
+		StockDailyMarket: newStockDailyMarket(db, opts...),
+		StockDate:        newStockDate(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Stock     stock
-	StockDate stockDate
+	Stock            stock
+	StockDailyMarket stockDailyMarket
+	StockDate        stockDate
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:        db,
-		Stock:     q.Stock.clone(db),
-		StockDate: q.StockDate.clone(db),
+		db:               db,
+		Stock:            q.Stock.clone(db),
+		StockDailyMarket: q.StockDailyMarket.clone(db),
+		StockDate:        q.StockDate.clone(db),
 	}
 }
 
@@ -62,21 +67,24 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:        db,
-		Stock:     q.Stock.replaceDB(db),
-		StockDate: q.StockDate.replaceDB(db),
+		db:               db,
+		Stock:            q.Stock.replaceDB(db),
+		StockDailyMarket: q.StockDailyMarket.replaceDB(db),
+		StockDate:        q.StockDate.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Stock     IStockDo
-	StockDate IStockDateDo
+	Stock            IStockDo
+	StockDailyMarket IStockDailyMarketDo
+	StockDate        IStockDateDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Stock:     q.Stock.WithContext(ctx),
-		StockDate: q.StockDate.WithContext(ctx),
+		Stock:            q.Stock.WithContext(ctx),
+		StockDailyMarket: q.StockDailyMarket.WithContext(ctx),
+		StockDate:        q.StockDate.WithContext(ctx),
 	}
 }
 

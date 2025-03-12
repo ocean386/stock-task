@@ -24,18 +24,18 @@ import (
 func StockTask() {
 
 	//深圳A股(main-主板 nm-创业板)
-	RequestHttpStockListSZ("main")
+	GetStockListSZ("main")
 	time.Sleep(time.Second * 5)
-	RequestHttpStockListSZ("nm")
+	GetStockListSZ("nm")
 
 	//上海A股(1-主板 8-科创板)
 	for i := 1; i <= 8; i = i + 7 {
-		RequestHttpStockListSH(i)
+		GetStockListSH(i)
 		time.Sleep(time.Second * 5)
 	}
 
 	//北京A股
-	RequestHttpStockListBJ()
+	GetStockListBJ()
 
 	//更新股票归属行业 以及行业代码(数据来源-东方财富)
 	StockIndustryBatchUpdate()
@@ -48,8 +48,6 @@ func StockTask() {
 // 判断股票为次新股 stock_zt_pool_sub_new_em
 func IsStockNew() {
 
-	logx.Infof("执行 StockHTTP 任务:%v", time.Now().Format("15:04:05"))
-	// 构建请求参数
 	now := time.Now()
 	params := url.Values{}
 	params.Add("ut", "7eea3edcaed734bea9cbfc24409ed989")
@@ -60,7 +58,6 @@ func IsStockNew() {
 	params.Add("date", now.Format("20060102")) // 当前日期
 	params.Add("_", cast.ToString(now.UnixNano()/1e6))
 
-	// 构建完整URL
 	strUrl := "https://push2ex.eastmoney.com/getTopicCXPooll"
 	fullUrl := fmt.Sprintf("%s?%s", strUrl, params.Encode())
 
@@ -98,7 +95,6 @@ func IsStockNew() {
 		return
 	}
 
-	// 获取 data 中的 pool 列表
 	poolData, ok := respData["data"].(map[string]interface{})
 	if !ok {
 		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", strUrl)
@@ -110,7 +106,6 @@ func IsStockNew() {
 		return
 	}
 
-	// 解析所需字段
 	for _, item := range dataList {
 		itemMap, ok := item.(map[string]interface{})
 		if !ok {
@@ -153,13 +148,13 @@ func StockIndustryBatchUpdate() {
 		if len(strSecID) == 0 {
 			continue
 		}
-		RequestHttpStockIndustry(strSecID, s.StockCode)
+		GetStockIndustry(strSecID, s.StockCode)
 		time.Sleep(time.Millisecond * 100)
 	}
 }
 
 // 获取个股所属行业  stock_individual_info_em
-func RequestHttpStockIndustry(strSecID, strStockCode string) {
+func GetStockIndustry(strSecID, strStockCode string) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/stock/get"
 	params := url.Values{}
@@ -203,7 +198,6 @@ func RequestHttpStockIndustry(strSecID, strStockCode string) {
 		return
 	}
 
-	// 获取 pageHelp 中的 data 列表
 	data, ok := respData["data"].(map[string]interface{})
 	if !ok {
 		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", strUrl)
@@ -232,12 +226,10 @@ func RequestHttpStockIndustry(strSecID, strStockCode string) {
 		return
 	}
 
-	logx.Infof("%v %v %v ", strSecID, strIndustryName, strIndustryCode)
-
 }
 
-// RequestHttpStockListSZ HTTP Get 请求 深圳交易所-股票列表
-func RequestHttpStockListSZ(showType string) {
+// GetStockListSZ HTTP Get 请求 深圳交易所-股票列表
+func GetStockListSZ(showType string) {
 
 	strUrl := "https://www.szse.cn/api/report/ShowReport"
 	nMarketType := 2
@@ -247,7 +239,6 @@ func RequestHttpStockListSZ(showType string) {
 		strRange = "10%"
 	}
 
-	// 构建请求参数
 	params := url.Values{}
 	params.Add("SHOWTYPE", "xlsx")
 	params.Add("CATALOGID", "1110")
@@ -324,11 +315,10 @@ func RequestHttpStockListSZ(showType string) {
 			}
 		}
 	}
-
 }
 
-// RequestHttpStockList HTTP Get 请求 上海交易所-股票列表
-func RequestHttpStockListSH(stockType int) {
+// GetStockList HTTP Get 请求 上海交易所-股票列表
+func GetStockListSH(stockType int) {
 
 	strUrl := "https://query.sse.com.cn/sseQuery/commonQuery.do"
 	nMarketType := 3
@@ -434,8 +424,8 @@ func RequestHttpStockListSH(stockType int) {
 	}
 }
 
-// RequestHttpStockListBJ HTTP Post 请求 北京交易所-股票列表
-func RequestHttpStockListBJ() {
+// GetStockListBJ HTTP Post 请求 北京交易所-股票列表
+func GetStockListBJ() {
 
 	strUrl := "https://www.bse.cn/nqxxController/nqxxCnzq.do"
 	// 第一次请求获取总页数

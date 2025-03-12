@@ -26,6 +26,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/karlseguin/ccache/v3 v3.0.5 // indirect
 	github.com/longbridgeapp/sqlparser v0.3.1 // indirect
+	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
