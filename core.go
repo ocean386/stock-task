@@ -6,6 +6,7 @@ import (
 	"github.com/libi/dcron"
 	"github.com/ocean386/stock-task/internal/config"
 	"github.com/ocean386/stock-task/internal/handler"
+	"github.com/ocean386/stock-task/internal/logic/task"
 	"github.com/ocean386/stock-task/internal/nacos"
 	"github.com/ocean386/stock-task/internal/svc"
 	"github.com/redis/go-redis/v9"
@@ -54,9 +55,10 @@ func main() {
 		dcron.CronOptionSeconds(),
 	)
 
-	//dCron.AddFunc("StockHTTP", "00 07 18 * * *", func() {
-	//	task.IsStockNew()
-	//})
+	//每月15号更新下个月交易日期
+	dCron.AddFunc("StockHTTP", "00 00 04 15 * *", func() {
+		task.StockDateUpdate()
+	})
 
 	go dCron.Start()
 	handler.RegisterHandlers(server, svcCtx)

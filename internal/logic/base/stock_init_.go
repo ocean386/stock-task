@@ -16,6 +16,10 @@ import (
 	"time"
 )
 
+/*
+1.A股信息-更新: 股票代码 股票简称 交易所  市场类型 次新股 行业 行业代码
+*/
+
 // A股名称列表 stock_info_a_code_name
 func StockTask() {
 
