@@ -57,7 +57,7 @@ type stock struct {
 	StockName              field.String  // 股票名称
 	TotalMarketValue       field.Float64 // 总市值
 	CirculatingMarketValue field.Float64 // 流通市值
-	PlateType              field.Int64   // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
+	PlateType              field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
 	Industry               field.String  // 行业
 	IndustryCode           field.String  // 行业代码
 	Exchange               field.Int64   // 交易所(0-全部,1-深圳,2-上海,3-北京)

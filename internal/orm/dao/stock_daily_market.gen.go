@@ -44,7 +44,7 @@ func newStockDailyMarket(db *gorm.DB, opts ...gen.DOOption) stockDailyMarket {
 	_stockDailyMarket.IncreaseRate20d = field.NewFloat64(tableName, "increase_rate_20d")
 	_stockDailyMarket.Highest52w = field.NewFloat64(tableName, "highest_52w")
 	_stockDailyMarket.Lowest52w = field.NewFloat64(tableName, "lowest_52w")
-	_stockDailyMarket.Volume = field.NewInt64(tableName, "volume")
+	_stockDailyMarket.Volume = field.NewFloat64(tableName, "volume")
 	_stockDailyMarket.KlineType = field.NewInt64(tableName, "kline_type")
 	_stockDailyMarket.TradingDate = field.NewTime(tableName, "trading_date")
 	_stockDailyMarket.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -76,7 +76,7 @@ type stockDailyMarket struct {
 	IncreaseRate20d field.Float64 // 20日涨幅
 	Highest52w      field.Float64 // 52周最高价
 	Lowest52w       field.Float64 // 52周最低价
-	Volume          field.Int64   // 成交量
+	Volume          field.Float64 // 成交量
 	KlineType       field.Int64   // K线类型(0-日K线,1-周K线,2-月K线)
 	TradingDate     field.Time    // 交易日期
 	UpdatedAt       field.Time    // 更新时间
@@ -113,7 +113,7 @@ func (s *stockDailyMarket) updateTableName(table string) *stockDailyMarket {
 	s.IncreaseRate20d = field.NewFloat64(table, "increase_rate_20d")
 	s.Highest52w = field.NewFloat64(table, "highest_52w")
 	s.Lowest52w = field.NewFloat64(table, "lowest_52w")
-	s.Volume = field.NewInt64(table, "volume")
+	s.Volume = field.NewFloat64(table, "volume")
 	s.KlineType = field.NewInt64(table, "kline_type")
 	s.TradingDate = field.NewTime(table, "trading_date")
 	s.UpdatedAt = field.NewTime(table, "updated_at")

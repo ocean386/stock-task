@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"github.com/ocean386/stock-task/internal/logic/task"
 	"time"
 
 	"github.com/ocean386/stock-task/internal/svc"
@@ -29,7 +30,7 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 
 	resp = &types.BaseMsgResp{}
 
-	//go task.StockMarketDataBatchUpdate()
+	go task.StockRealTimeMarketDataBatchUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 )
 
 // 更新A股日K线行情数据-批量
-func StockMarketDataBatchUpdate() {
+func StockDailyMarketBatchUpdate() {
 
 	stockList, err := dao.Stock.Find()
 	if err != nil {
@@ -61,7 +61,7 @@ func StockMarketDataBatchUpdate() {
 				continue
 			}
 			logx.Infof("Code:%v, Date:%v, strCode:%v, strKlineType:%v ", s.StockCode, strBeginDate, strCode, klineType)
-			StockMarketDataUpdate(strBeginDate, strSecID, strCode, klineType)
+			StockDailyMarketUpdate(strBeginDate, strSecID, strCode, klineType)
 			time.Sleep(time.Millisecond * 200)
 		}
 
@@ -70,7 +70,7 @@ func StockMarketDataBatchUpdate() {
 }
 
 // 更新A股日K线 行情数据
-func StockMarketDataUpdate(strBeginDate, strSecID, strCode string, klineType int64) {
+func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType int64) {
 
 	var strKlineType string
 	switch klineType { //{"日K线": "101", "周K线": "102", "月K线": "103"}
@@ -181,7 +181,7 @@ func StockMarketDataUpdate(strBeginDate, strSecID, strCode string, klineType int
 		closePrice := cast.ToFloat64(fields[2])   // 现价-收盘价
 		highPrice := cast.ToFloat64(fields[3])    // 最高价
 		lowPrice := cast.ToFloat64(fields[4])     // 最低价
-		volume := cast.ToInt64(fields[5])         //成交量
+		volume := cast.ToFloat64(fields[5])       //成交量
 		amount := cast.ToFloat64(fields[6])       //成交额
 		amplitude := cast.ToFloat64(fields[7])    //振幅
 		increaseRate := cast.ToFloat64(fields[8]) //涨幅
