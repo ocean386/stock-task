@@ -4,12 +4,16 @@
 
 package model
 
+import (
+	"time"
+)
+
 const TableNameStockDate = "stock_date"
 
 // StockDate 交易日期-A股
 type StockDate struct {
-	ID        int64 `gorm:"column:id;type:bigint(20);primaryKey;autoIncrement:true;comment:主键ID" json:"id"` // 主键ID
-	StockDate int64 `gorm:"column:stock_date;type:bigint(20);not null;comment:交易日期" json:"stock_date"`      // 交易日期
+	ID        int64     `gorm:"column:id;type:bigint(20);primaryKey;autoIncrement:true;comment:主键ID" json:"id"` // 主键ID
+	StockDate time.Time `gorm:"column:stock_date;type:timestamp" json:"stock_date"`
 }
 
 // TableName StockDate's table name

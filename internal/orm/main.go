@@ -73,6 +73,7 @@ func main() {
 		"mediumint": func(columnType gorm.ColumnType) (dataType string) { return "int64" },
 		"bigint":    func(columnType gorm.ColumnType) (dataType string) { return "int64" },
 		"int":       func(columnType gorm.ColumnType) (dataType string) { return "int64" },
+		"timestamp": func(columnType gorm.ColumnType) (dataType string) { return "time.Time" },
 	}
 	// 要先于`ApplyBasic`执行
 	g.WithDataTypeMap(dataMap)

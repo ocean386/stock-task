@@ -29,15 +29,19 @@ func newStock(db *gorm.DB, opts ...gen.DOOption) stock {
 	_stock.ALL = field.NewAsterisk(tableName)
 	_stock.StockCode = field.NewString(tableName, "stock_code")
 	_stock.StockName = field.NewString(tableName, "stock_name")
+	_stock.TotalMarketValue = field.NewFloat64(tableName, "total_market_value")
+	_stock.CirculatingMarketValue = field.NewFloat64(tableName, "circulating_market_value")
+	_stock.PlateType = field.NewInt64(tableName, "plate_type")
 	_stock.Industry = field.NewString(tableName, "industry")
 	_stock.IndustryCode = field.NewString(tableName, "industry_code")
 	_stock.Exchange = field.NewInt64(tableName, "exchange")
 	_stock.MarketType = field.NewInt64(tableName, "market_type")
-	_stock.IncreaseRange = field.NewString(tableName, "increase_range")
+	_stock.IncreaseRange = field.NewFloat64(tableName, "increase_range")
 	_stock.IsNewlyListed = field.NewInt64(tableName, "is_newly_listed")
-	_stock.ListingDate = field.NewInt64(tableName, "listing_date")
-	_stock.CreatedAt = field.NewInt64(tableName, "created_at")
-	_stock.UpdatedAt = field.NewInt64(tableName, "updated_at")
+	_stock.IsStStock = field.NewInt64(tableName, "is_st_stock")
+	_stock.ListingDate = field.NewTime(tableName, "listing_date")
+	_stock.CreatedAt = field.NewTime(tableName, "created_at")
+	_stock.UpdatedAt = field.NewTime(tableName, "updated_at")
 
 	_stock.fillFieldMap()
 
@@ -48,18 +52,22 @@ func newStock(db *gorm.DB, opts ...gen.DOOption) stock {
 type stock struct {
 	stockDo
 
-	ALL           field.Asterisk
-	StockCode     field.String // 股票代码
-	StockName     field.String // 股票名称
-	Industry      field.String // 行业
-	IndustryCode  field.String // 行业代码
-	Exchange      field.Int64  // 交易所(0-全部,1-深圳,2-上海,3-北京)
-	MarketType    field.Int64  // 市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-	IncreaseRange field.String // 涨幅范围(10%,20%,30%)
-	IsNewlyListed field.Int64  // 次新股(0-否 1-是) 上市时间一年以内
-	ListingDate   field.Int64  // 上市日期
-	CreatedAt     field.Int64  // 创建时间
-	UpdatedAt     field.Int64  // 更新时间
+	ALL                    field.Asterisk
+	StockCode              field.String  // 股票代码
+	StockName              field.String  // 股票名称
+	TotalMarketValue       field.Float64 // 总市值
+	CirculatingMarketValue field.Float64 // 流通市值
+	PlateType              field.Int64   // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
+	Industry               field.String  // 行业
+	IndustryCode           field.String  // 行业代码
+	Exchange               field.Int64   // 交易所(0-全部,1-深圳,2-上海,3-北京)
+	MarketType             field.Int64   // 市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
+	IncreaseRange          field.Float64 // 涨幅范围
+	IsNewlyListed          field.Int64   // 次新股(0-否 1-是) 上市时间一年以内
+	IsStStock              field.Int64   // ST股票(0-否 1-是)若ST则后期清理数据
+	ListingDate            field.Time    // 上市日期
+	CreatedAt              field.Time    // 创建时间
+	UpdatedAt              field.Time    // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -78,15 +86,19 @@ func (s *stock) updateTableName(table string) *stock {
 	s.ALL = field.NewAsterisk(table)
 	s.StockCode = field.NewString(table, "stock_code")
 	s.StockName = field.NewString(table, "stock_name")
+	s.TotalMarketValue = field.NewFloat64(table, "total_market_value")
+	s.CirculatingMarketValue = field.NewFloat64(table, "circulating_market_value")
+	s.PlateType = field.NewInt64(table, "plate_type")
 	s.Industry = field.NewString(table, "industry")
 	s.IndustryCode = field.NewString(table, "industry_code")
 	s.Exchange = field.NewInt64(table, "exchange")
 	s.MarketType = field.NewInt64(table, "market_type")
-	s.IncreaseRange = field.NewString(table, "increase_range")
+	s.IncreaseRange = field.NewFloat64(table, "increase_range")
 	s.IsNewlyListed = field.NewInt64(table, "is_newly_listed")
-	s.ListingDate = field.NewInt64(table, "listing_date")
-	s.CreatedAt = field.NewInt64(table, "created_at")
-	s.UpdatedAt = field.NewInt64(table, "updated_at")
+	s.IsStStock = field.NewInt64(table, "is_st_stock")
+	s.ListingDate = field.NewTime(table, "listing_date")
+	s.CreatedAt = field.NewTime(table, "created_at")
+	s.UpdatedAt = field.NewTime(table, "updated_at")
 
 	s.fillFieldMap()
 
@@ -103,15 +115,19 @@ func (s *stock) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *stock) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 11)
+	s.fieldMap = make(map[string]field.Expr, 15)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
+	s.fieldMap["total_market_value"] = s.TotalMarketValue
+	s.fieldMap["circulating_market_value"] = s.CirculatingMarketValue
+	s.fieldMap["plate_type"] = s.PlateType
 	s.fieldMap["industry"] = s.Industry
 	s.fieldMap["industry_code"] = s.IndustryCode
 	s.fieldMap["exchange"] = s.Exchange
 	s.fieldMap["market_type"] = s.MarketType
 	s.fieldMap["increase_range"] = s.IncreaseRange
 	s.fieldMap["is_newly_listed"] = s.IsNewlyListed
+	s.fieldMap["is_st_stock"] = s.IsStStock
 	s.fieldMap["listing_date"] = s.ListingDate
 	s.fieldMap["created_at"] = s.CreatedAt
 	s.fieldMap["updated_at"] = s.UpdatedAt

@@ -28,7 +28,7 @@ func newStockDate(db *gorm.DB, opts ...gen.DOOption) stockDate {
 	tableName := _stockDate.stockDateDo.TableName()
 	_stockDate.ALL = field.NewAsterisk(tableName)
 	_stockDate.ID = field.NewInt64(tableName, "id")
-	_stockDate.StockDate = field.NewInt64(tableName, "stock_date")
+	_stockDate.StockDate = field.NewTime(tableName, "stock_date")
 
 	_stockDate.fillFieldMap()
 
@@ -41,7 +41,7 @@ type stockDate struct {
 
 	ALL       field.Asterisk
 	ID        field.Int64 // 主键ID
-	StockDate field.Int64 // 交易日期
+	StockDate field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -59,7 +59,7 @@ func (s stockDate) As(alias string) *stockDate {
 func (s *stockDate) updateTableName(table string) *stockDate {
 	s.ALL = field.NewAsterisk(table)
 	s.ID = field.NewInt64(table, "id")
-	s.StockDate = field.NewInt64(table, "stock_date")
+	s.StockDate = field.NewTime(table, "stock_date")
 
 	s.fillFieldMap()
 

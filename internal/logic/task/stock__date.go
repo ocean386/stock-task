@@ -91,13 +91,12 @@ func StockDateUpdate() {
 			logx.Errorf("日期解析出错: %v，日期字符串: %s", err, tradeDate)
 			return
 		}
-		timestamp := tData.Unix()
-		date := &model.StockDate{StockDate: tData.Unix()}
+
+		date := &model.StockDate{StockDate: tData}
 		err = dao.StockDate.Save(date)
 		if err != nil {
 			logx.Errorf("dao StockDate save db [%v] error:%v", tradeDate, err.Error())
 			return
 		}
-		logx.Infof("[A股交易日期] 交易日期 %s, 时间戳:%d", tradeDate, timestamp)
 	}
 }

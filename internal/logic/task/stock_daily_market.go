@@ -41,7 +41,7 @@ func StockMarketDataBatchUpdate() {
 				strCode      string
 			)
 			if err == nil {
-				strBeginDate = time.Unix(marketData.TradingDate, 0).Format(time.DateOnly)
+				strBeginDate = marketData.TradingDate.Format(time.DateOnly)
 				strBeginDate = strings.Replace(strBeginDate, "-", "", 2)
 			}
 
@@ -161,8 +161,8 @@ func StockMarketDataUpdate(strBeginDate, strSecID, strCode string, klineType int
 	var (
 		marketSlice []*model.StockDailyMarket
 	)
-	// 定义 2005 年 01 月 01 日的时间
-	targetDate, _ := time.Parse("2006-01-02", "2005-01-01") //过滤2005-01-01的数据
+	// 定义 2010 年 01 月 01 日的时间
+	targetDate, _ := time.Parse("2006-01-02", "2010-01-01") //过滤2010-01-01 行情数据
 	// 解析每行数据
 	for _, kline := range kData {
 		klineStr, ok := kline.(string)
@@ -204,7 +204,7 @@ func StockMarketDataUpdate(strBeginDate, strSecID, strCode string, klineType int
 			LowestPrice:  lowPrice,
 			Volume:       volume,
 			KlineType:    klineType,
-			TradingDate:  tDate.Unix(),
+			TradingDate:  tDate,
 		}
 
 		marketSlice = append(marketSlice, marketData)

@@ -20,7 +20,7 @@ import (
 1.A股信息-更新: 股票代码 股票简称 交易所  市场类型 次新股 行业 行业代码
 */
 
-// A股名称列表 stock_info_a_code_name
+// A股名称列表
 func StockTask() {
 
 	//深圳A股(main-主板 nm-创业板)
@@ -45,7 +45,7 @@ func StockTask() {
 
 }
 
-// 判断股票为次新股 stock_zt_pool_sub_new_em
+// 判断股票为次新股
 func IsStockNew() {
 
 	now := time.Now()
@@ -115,7 +115,7 @@ func IsStockNew() {
 		stockCode, _ := itemMap["c"].(string)
 		info, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).Updates(model.Stock{
 			IsNewlyListed: 1,
-			UpdatedAt:     time.Now().Unix(),
+			UpdatedAt:     time.Now(),
 		})
 		if err != nil {
 			logx.Errorf("MySql Stock Update error:%s", err.Error())
@@ -153,7 +153,7 @@ func StockIndustryBatchUpdate() {
 	}
 }
 
-// 获取个股所属行业  stock_individual_info_em
+// 获取个股所属行业
 func GetStockIndustry(strSecID, strStockCode string) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/stock/get"
@@ -214,7 +214,7 @@ func GetStockIndustry(strSecID, strStockCode string) {
 	info, err := dao.Stock.Where(dao.Stock.StockCode.Eq(strStockCode)).Updates(model.Stock{
 		Industry:     strIndustryName,
 		IndustryCode: strIndustryCode,
-		UpdatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now(),
 	})
 	if err != nil {
 		logx.Errorf("MySql Stock Update error:%s", err.Error())
@@ -233,10 +233,10 @@ func GetStockListSZ(showType string) {
 
 	strUrl := "https://www.szse.cn/api/report/ShowReport"
 	nMarketType := 2
-	strRange := "20%"
+	fRange := float64(20)
 	if showType == "main" {
 		nMarketType = 1
-		strRange = "10%"
+		fRange = 10
 	}
 
 	params := url.Values{}
@@ -288,7 +288,7 @@ func GetStockListSZ(showType string) {
 				stockCode := strings.TrimSpace(row.Cells[4].Value)
 				stockName := strings.TrimSpace(row.Cells[5].Value)
 				listDate := strings.TrimSpace(row.Cells[6].Value)
-				listDate = strings.Replace(listDate, "-", "", 2)
+				tDate, _ := time.Parse(time.DateOnly, listDate)
 				re := regexp.MustCompile(`<[^>]*>`)
 				stockName = re.ReplaceAllString(stockName, "")
 				if strings.Contains(stockName, "ST") {
@@ -300,11 +300,11 @@ func GetStockListSZ(showType string) {
 					StockName:     stockName,
 					Exchange:      1,                  //交易所(1-深圳,2-上海,3-北京)
 					MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-					IncreaseRange: strRange,
+					IncreaseRange: fRange,
 					IsNewlyListed: 0,
-					ListingDate:   cast.ToInt64(listDate),
-					CreatedAt:     time.Now().Unix(),
-					UpdatedAt:     time.Now().Unix(),
+					ListingDate:   tDate,
+					CreatedAt:     time.Now(),
+					UpdatedAt:     time.Now(),
 				}
 				logx.Infof("Code:%v Name:%v Date:%v", stockCode, stockName, listDate)
 				err = dao.Stock.Save(&data)
@@ -322,10 +322,10 @@ func GetStockListSH(stockType int) {
 
 	strUrl := "https://query.sse.com.cn/sseQuery/commonQuery.do"
 	nMarketType := 3
-	strRange := "20%"
+	fRange := float64(20)
 	if stockType == 1 {
 		nMarketType = 1
-		strRange = "10%"
+		fRange = 10
 	}
 
 	params := url.Values{}
@@ -401,6 +401,7 @@ func GetStockListSH(stockType int) {
 		stockCode, _ := itemMap["A_STOCK_CODE"].(string)
 		stockName, _ := itemMap["COMPANY_ABBR"].(string)
 		listDate, _ := itemMap["LIST_DATE"].(string)
+		tDate, _ := time.Parse("20060102", listDate)
 		if strings.Contains(stockName, "ST") {
 			continue
 		}
@@ -410,11 +411,11 @@ func GetStockListSH(stockType int) {
 			StockName:     stockName,
 			Exchange:      2,                  //交易所(1-深圳,2-上海,3-北京)
 			MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-			IncreaseRange: strRange,
+			IncreaseRange: fRange,
 			IsNewlyListed: 0,
-			ListingDate:   cast.ToInt64(listDate),
-			CreatedAt:     time.Now().Unix(),
-			UpdatedAt:     time.Now().Unix(),
+			ListingDate:   tDate,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
 		}
 		err = dao.Stock.Save(&data)
 		if err != nil {
@@ -514,6 +515,7 @@ func GetStockListBJ() {
 						stockCode, _ := itemMap["xxzqdm"].(string)
 						stockName, _ := itemMap["xxzqjc"].(string)
 						listDate, _ := itemMap["fxssrq"].(string)
+						tDate, _ := time.Parse("20060102", listDate)
 						if strings.Contains(stockName, "ST") {
 							continue
 						}
@@ -523,11 +525,11 @@ func GetStockListBJ() {
 							StockName:     stockName,
 							Exchange:      3,        //交易所(1-深圳,2-上海,3-北京)
 							MarketType:    int64(4), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-							IncreaseRange: "30%",
+							IncreaseRange: 30,
 							IsNewlyListed: 0,
-							ListingDate:   cast.ToInt64(listDate),
-							CreatedAt:     time.Now().Unix(),
-							UpdatedAt:     time.Now().Unix(),
+							ListingDate:   tDate,
+							CreatedAt:     time.Now(),
+							UpdatedAt:     time.Now(),
 						}
 						err = dao.Stock.Save(&data)
 						if err != nil {

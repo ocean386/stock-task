@@ -46,7 +46,8 @@ func newStockDailyMarket(db *gorm.DB, opts ...gen.DOOption) stockDailyMarket {
 	_stockDailyMarket.Lowest52w = field.NewFloat64(tableName, "lowest_52w")
 	_stockDailyMarket.Volume = field.NewInt64(tableName, "volume")
 	_stockDailyMarket.KlineType = field.NewInt64(tableName, "kline_type")
-	_stockDailyMarket.TradingDate = field.NewInt64(tableName, "trading_date")
+	_stockDailyMarket.TradingDate = field.NewTime(tableName, "trading_date")
+	_stockDailyMarket.UpdatedAt = field.NewTime(tableName, "updated_at")
 
 	_stockDailyMarket.fillFieldMap()
 
@@ -77,7 +78,8 @@ type stockDailyMarket struct {
 	Lowest52w       field.Float64 // 52周最低价
 	Volume          field.Int64   // 成交量
 	KlineType       field.Int64   // K线类型(0-日K线,1-周K线,2-月K线)
-	TradingDate     field.Int64   // 交易日期
+	TradingDate     field.Time    // 交易日期
+	UpdatedAt       field.Time    // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -113,7 +115,8 @@ func (s *stockDailyMarket) updateTableName(table string) *stockDailyMarket {
 	s.Lowest52w = field.NewFloat64(table, "lowest_52w")
 	s.Volume = field.NewInt64(table, "volume")
 	s.KlineType = field.NewInt64(table, "kline_type")
-	s.TradingDate = field.NewInt64(table, "trading_date")
+	s.TradingDate = field.NewTime(table, "trading_date")
+	s.UpdatedAt = field.NewTime(table, "updated_at")
 
 	s.fillFieldMap()
 
@@ -130,7 +133,7 @@ func (s *stockDailyMarket) GetFieldByName(fieldName string) (field.OrderExpr, bo
 }
 
 func (s *stockDailyMarket) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 20)
+	s.fieldMap = make(map[string]field.Expr, 21)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["turnover"] = s.Turnover
@@ -151,6 +154,7 @@ func (s *stockDailyMarket) fillFieldMap() {
 	s.fieldMap["volume"] = s.Volume
 	s.fieldMap["kline_type"] = s.KlineType
 	s.fieldMap["trading_date"] = s.TradingDate
+	s.fieldMap["updated_at"] = s.UpdatedAt
 }
 
 func (s stockDailyMarket) clone(db *gorm.DB) stockDailyMarket {
