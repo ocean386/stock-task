@@ -38,7 +38,6 @@ func newStockDailyMarket(db *gorm.DB, opts ...gen.DOOption) stockDailyMarket {
 	_stockDailyMarket.OpeningPrice = field.NewFloat64(tableName, "opening_price")
 	_stockDailyMarket.HighestPrice = field.NewFloat64(tableName, "highest_price")
 	_stockDailyMarket.LowestPrice = field.NewFloat64(tableName, "lowest_price")
-	_stockDailyMarket.YesterdayPrice = field.NewFloat64(tableName, "yesterday_price")
 	_stockDailyMarket.IncreaseRate5d = field.NewFloat64(tableName, "increase_rate_5d")
 	_stockDailyMarket.IncreaseRate10d = field.NewFloat64(tableName, "increase_rate_10d")
 	_stockDailyMarket.IncreaseRate20d = field.NewFloat64(tableName, "increase_rate_20d")
@@ -54,7 +53,7 @@ func newStockDailyMarket(db *gorm.DB, opts ...gen.DOOption) stockDailyMarket {
 	return _stockDailyMarket
 }
 
-// stockDailyMarket 每日行情信息列表-A股
+// stockDailyMarket 每日行情信息列表 - A股
 type stockDailyMarket struct {
 	stockDailyMarketDo
 
@@ -70,7 +69,6 @@ type stockDailyMarket struct {
 	OpeningPrice    field.Float64 // 开盘
 	HighestPrice    field.Float64 // 最高
 	LowestPrice     field.Float64 // 最低
-	YesterdayPrice  field.Float64 // 昨日
 	IncreaseRate5d  field.Float64 // 5日涨幅
 	IncreaseRate10d field.Float64 // 10日涨幅
 	IncreaseRate20d field.Float64 // 20日涨幅
@@ -107,7 +105,6 @@ func (s *stockDailyMarket) updateTableName(table string) *stockDailyMarket {
 	s.OpeningPrice = field.NewFloat64(table, "opening_price")
 	s.HighestPrice = field.NewFloat64(table, "highest_price")
 	s.LowestPrice = field.NewFloat64(table, "lowest_price")
-	s.YesterdayPrice = field.NewFloat64(table, "yesterday_price")
 	s.IncreaseRate5d = field.NewFloat64(table, "increase_rate_5d")
 	s.IncreaseRate10d = field.NewFloat64(table, "increase_rate_10d")
 	s.IncreaseRate20d = field.NewFloat64(table, "increase_rate_20d")
@@ -133,7 +130,7 @@ func (s *stockDailyMarket) GetFieldByName(fieldName string) (field.OrderExpr, bo
 }
 
 func (s *stockDailyMarket) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 21)
+	s.fieldMap = make(map[string]field.Expr, 20)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["turnover"] = s.Turnover
@@ -145,7 +142,6 @@ func (s *stockDailyMarket) fillFieldMap() {
 	s.fieldMap["opening_price"] = s.OpeningPrice
 	s.fieldMap["highest_price"] = s.HighestPrice
 	s.fieldMap["lowest_price"] = s.LowestPrice
-	s.fieldMap["yesterday_price"] = s.YesterdayPrice
 	s.fieldMap["increase_rate_5d"] = s.IncreaseRate5d
 	s.fieldMap["increase_rate_10d"] = s.IncreaseRate10d
 	s.fieldMap["increase_rate_20d"] = s.IncreaseRate20d

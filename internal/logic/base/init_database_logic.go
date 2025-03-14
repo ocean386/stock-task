@@ -30,6 +30,7 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 
 	resp = &types.BaseMsgResp{}
 
+	//go task.StockDailyMarketBatchUpdate()
 	go task.StockRealTimeMarketDataBatchUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")

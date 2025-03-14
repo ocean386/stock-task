@@ -22,11 +22,14 @@ func StockRealTimeMarketDataBatchUpdate() {
 		nType   int // 0-流通市值 1-实时行情数据
 	)
 	bStatus = true
-	nType = 1
-	for bStatus == true {
-		idx = idx + 1
-		bStatus = StockRealTimeMarketDataUpdate(idx, nType)
-		time.Sleep(time.Second * 2)
+	nType = 0
+	for nType < 2 {
+		for bStatus == true {
+			idx = idx + 1
+			bStatus = StockRealTimeMarketDataUpdate(idx, nType)
+			time.Sleep(time.Second * 2)
+		}
+		nType = nType + 1
 	}
 
 	logx.Infof("A股实时行情数据-更新完成.")
@@ -134,7 +137,7 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 				LowestPrice:  lowestPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
 				Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
 				KlineType:    0, //K线类型(0-日K线,1-周K线,2-月K线)
-				TradingDate:  time.Date(now.Year(), now.Month(), now.Day(), 9, 0, 0, 0, now.Location()),
+				TradingDate:  time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()),
 			}
 			err = dao.StockDailyMarket.Save(&mData)
 			if err != nil {

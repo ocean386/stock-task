@@ -5,6 +5,7 @@ import (
 	internalHttp "github.com/ocean386/common/http"
 	"github.com/ocean386/stock-task/internal/orm/dao"
 	"github.com/ocean386/stock-task/internal/orm/model"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -14,10 +15,20 @@ import (
 	"time"
 )
 
+func IsToday(t time.Time) bool {
+	now := time.Now()
+	return t.Year() == now.Year() && t.YearDay() == now.YearDay()
+}
+
+func IsThisMonth(t time.Time) bool {
+	now := time.Now()
+	return t.Year() == now.Year() && t.Month() == now.Month()
+}
+
 // 更新A股日K线行情数据-批量
 func StockDailyMarketBatchUpdate() {
 
-	stockList, err := dao.Stock.Find()
+	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(2, 3)).Find() //小盘,中盘
 	if err != nil {
 		logx.Errorf("dao stock find db error:%s", err.Error())
 		return
@@ -41,8 +52,23 @@ func StockDailyMarketBatchUpdate() {
 				strCode      string
 			)
 			if err == nil {
+				if IsToday(marketData.TradingDate) {
+					continue
+				}
+				if klineType == 0 { //日
+					marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 1)
+				} else if klineType == 1 { //周
+					marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 7)
+				} else { //月
+					marketData.TradingDate = marketData.TradingDate.AddDate(0, 1, 0)
+				}
+
 				strBeginDate = marketData.TradingDate.Format(time.DateOnly)
 				strBeginDate = strings.Replace(strBeginDate, "-", "", 2)
+
+				if IsToday(marketData.TradingDate) || IsThisMonth(marketData.TradingDate) {
+					continue
+				}
 			}
 
 			switch s.Exchange {
@@ -60,7 +86,7 @@ func StockDailyMarketBatchUpdate() {
 			if len(strSecID) == 0 {
 				continue
 			}
-			logx.Infof("Code:%v, Date:%v, strCode:%v, strKlineType:%v ", s.StockCode, strBeginDate, strCode, klineType)
+
 			StockDailyMarketUpdate(strBeginDate, strSecID, strCode, klineType)
 			time.Sleep(time.Millisecond * 200)
 		}
@@ -93,13 +119,12 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	if len(strBeginDate) > 0 {
 		params.Add("beg", strBeginDate)
 	} else {
-		params.Add("beg", "20050101")
+		params.Add("beg", "20150101")
 	}
-	params.Add("end", "20300101")
+	params.Add("end", "20250313")
 	params.Add("lmt", "10000")
 	params.Add("_", fmt.Sprintf("%d", time.Now().UnixNano()/1e6))
 	fullUrl := fmt.Sprintf("%s?%s", strUrl, params.Encode())
-
 	// 设置请求头
 	headers := map[string]string{
 		"Accept":          "*/*",
@@ -161,8 +186,8 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	var (
 		marketSlice []*model.StockDailyMarket
 	)
-	// 定义 2010 年 01 月 01 日的时间
-	targetDate, _ := time.Parse("2006-01-02", "2010-01-01") //过滤2010-01-01 行情数据
+	// 定义 2015 年 01 月 01 日的时间
+	targetDate, _ := time.Parse("2006-01-02", "2015-01-01") //过滤2015-01-01 行情数据
 	// 解析每行数据
 	for _, kline := range kData {
 		klineStr, ok := kline.(string)
@@ -177,24 +202,25 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 		}
 		date := fields[0] // 交易日期
 		tDate, _ := time.Parse(time.DateOnly, date)
-		openPrice := cast.ToFloat64(fields[1])    // 开盘
-		closePrice := cast.ToFloat64(fields[2])   // 现价-收盘价
-		highPrice := cast.ToFloat64(fields[3])    // 最高价
-		lowPrice := cast.ToFloat64(fields[4])     // 最低价
-		volume := cast.ToFloat64(fields[5])       //成交量
-		amount := cast.ToFloat64(fields[6])       //成交额
+		openPrice := cast.ToFloat64(fields[1])                      // 开盘
+		closePrice := cast.ToFloat64(fields[2])                     // 现价-收盘价
+		highPrice := cast.ToFloat64(fields[3])                      // 最高价
+		lowPrice := cast.ToFloat64(fields[4])                       // 最低价
+		volume := decimal.NewFromInt(cast.ToInt64(fields[5]))       //成交量(万手)
+		turnover := decimal.NewFromFloat(cast.ToFloat64(fields[6])) //成交额(亿)
+
 		amplitude := cast.ToFloat64(fields[7])    //振幅
 		increaseRate := cast.ToFloat64(fields[8]) //涨幅
 		turnoverRate := cast.ToFloat64(fields[9]) //换手
 
-		if openPrice < 0 || closePrice < 0 || volume < 1000 || tDate.Before(targetDate) {
+		if openPrice < 0 || closePrice < 0 || volume.LessThan(decimal.NewFromInt(1)) || tDate.Before(targetDate) {
 			continue
 		}
 
 		marketData := &model.StockDailyMarket{
 			StockCode:    strStockCode,
 			StockName:    strName,
-			Turnover:     amount,
+			Turnover:     turnover.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
 			TurnoverRate: turnoverRate,
 			IncreaseRate: increaseRate,
 			Amplitude:    amplitude,
@@ -202,7 +228,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 			OpeningPrice: openPrice,
 			HighestPrice: highPrice,
 			LowestPrice:  lowPrice,
-			Volume:       volume,
+			Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
 			KlineType:    klineType,
 			TradingDate:  tDate,
 		}
@@ -215,16 +241,17 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 		return
 	}
 
-	size := len(marketSlice) / 1000
-	for i := 0; i < size || i == 0; i++ {
-		if size == 0 {
+	end := 0
+	for i := 0; i < len(marketSlice); i = end {
+		if len(marketSlice)/1000 == 0 {
 			err = dao.StockDailyMarket.Save(marketSlice...)
 			if err != nil {
 				logx.Errorf("dao StockDate save db [%v] error:%v", strName, err.Error())
 				return
 			}
+			break
 		} else {
-			end := i + 1000
+			end = i + 1000
 			if end > len(marketSlice) {
 				end = len(marketSlice)
 			}
