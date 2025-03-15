@@ -12,21 +12,21 @@ const TableNameStock = "stock"
 
 // Stock 股票列表-A股
 type Stock struct {
-	StockCode              string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                                         // 股票代码
-	StockName              string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                                           // 股票名称
-	TotalMarketValue       float64   `gorm:"column:total_market_value;type:decimal(8,2);not null;default:0.00;comment:总市值" json:"total_market_value"`              // 总市值
-	CirculatingMarketValue float64   `gorm:"column:circulating_market_value;type:decimal(8,2);not null;default:0.00;comment:流通市值" json:"circulating_market_value"` // 流通市值
-	PlateType              int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"`                 // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
-	Industry               string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                                 // 行业
-	IndustryCode           string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                                     // 行业代码
-	Exchange               int64     `gorm:"column:exchange;type:tinyint(4);not null;comment:交易所(0-全部,1-深圳,2-上海,3-北京)" json:"exchange"`                            // 交易所(0-全部,1-深圳,2-上海,3-北京)
-	MarketType             int64     `gorm:"column:market_type;type:tinyint(4);not null;comment:市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)" json:"market_type"` // 市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-	IncreaseRange          float64   `gorm:"column:increase_range;type:decimal(5,2);not null;default:0.00;comment:涨幅范围" json:"increase_range"`                     // 涨幅范围
-	IsNewlyListed          int64     `gorm:"column:is_newly_listed;type:tinyint(4);not null;comment:次新股(0-否 1-是) 上市时间一年以内" json:"is_newly_listed"`                 // 次新股(0-否 1-是) 上市时间一年以内
-	IsStStock              int64     `gorm:"column:is_st_stock;type:tinyint(4);not null;comment:ST股票(0-否 1-是)若ST则后期清理数据" json:"is_st_stock"`                       // ST股票(0-否 1-是)若ST则后期清理数据
-	ListingDate            time.Time `gorm:"column:listing_date;type:timestamp;not null;default:2000-01-01 00:00:01;comment:上市日期" json:"listing_date"`             // 上市日期
-	CreatedAt              time.Time `gorm:"column:created_at;comment:创建时间" json:"created_at"`                                                                     // 创建时间
-	UpdatedAt              time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                                 // 更新时间
+	StockCode              string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                                            // 股票代码
+	StockName              string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                                              // 股票名称
+	TotalMarketValue       float64   `gorm:"column:total_market_value;type:decimal(8,2);not null;default:0.00;comment:总市值(亿)" json:"total_market_value"`              // 总市值(亿)
+	CirculatingMarketValue float64   `gorm:"column:circulating_market_value;type:decimal(8,2);not null;default:0.00;comment:流通市值(亿)" json:"circulating_market_value"` // 流通市值(亿)
+	PlateType              int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"`                    // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	Industry               string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                                    // 行业
+	IndustryCode           string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                                        // 行业代码
+	Exchange               int64     `gorm:"column:exchange;type:tinyint(4);not null;comment:交易所(0-全部,1-深圳,2-上海,3-北京)" json:"exchange"`                               // 交易所(0-全部,1-深圳,2-上海,3-北京)
+	MarketType             int64     `gorm:"column:market_type;type:tinyint(4);not null;comment:市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)" json:"market_type"`    // 市场类别(0-全部,1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
+	IncreaseRange          float64   `gorm:"column:increase_range;type:decimal(5,2);not null;default:0.00;comment:涨幅范围" json:"increase_range"`                        // 涨幅范围
+	IsNewlyListed          int64     `gorm:"column:is_newly_listed;type:tinyint(4);not null;comment:次新股(0-否 1-是) 上市时间一年以内" json:"is_newly_listed"`                    // 次新股(0-否 1-是) 上市时间一年以内
+	IsStStock              int64     `gorm:"column:is_st_stock;type:tinyint(4);not null;comment:ST股票(0-否 1-是)若ST则后期清理数据" json:"is_st_stock"`                          // ST股票(0-否 1-是)若ST则后期清理数据
+	ListingDate            time.Time `gorm:"column:listing_date;type:date;not null;default:2000-01-01" json:"listing_date"`
+	CreatedAt              time.Time `gorm:"column:created_at;comment:创建时间" json:"created_at"`                     // 创建时间
+	UpdatedAt              time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"` // 更新时间
 }
 
 // TableName Stock's table name

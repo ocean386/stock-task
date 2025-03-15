@@ -31,22 +31,22 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	resp = &types.BaseMsgResp{}
 
 	//go task.StockDailyMarketBatchUpdate()
-	go task.StockRealTimeMarketDataBatchUpdate()
+	go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
-		logx.Errorf("Failed to check Redis key existence: %v", err)
+		logx.Errorf("[初始化数据] Failed to check Redis key existence: %v", err)
 		resp.Code = 500
-		resp.Msg = "Failed to check Redis key existence"
+		resp.Msg = "redis error"
 		return resp, err
 	}
 
 	if !exists {
 		err = l.svcCtx.Redis.SetexCtx(l.ctx, "StockInit", "1", 3600)
 		if err != nil {
-			logx.Errorf("Failed to set Redis key: %v", err)
+			logx.Errorf("[初始化数据] Failed to set Redis key: %v", err)
 			resp.Code = 500
-			resp.Msg = "Failed to set Redis key"
+			resp.Msg = "redis error"
 			return resp, err
 		}
 		//go StockTask()

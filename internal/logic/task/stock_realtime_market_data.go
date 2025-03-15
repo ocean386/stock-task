@@ -14,29 +14,31 @@ import (
 )
 
 // 更新A股实时行情数据-批量
-func StockRealTimeMarketDataBatchUpdate() {
+func StockRealTimeMarketDataBatchUpdate(nType int) {
 
 	var (
 		bStatus bool
 		idx     int
-		nType   int // 0-流通市值 1-实时行情数据
 	)
 	bStatus = true
-	nType = 0
-	for nType < 2 {
-		for bStatus == true {
-			idx = idx + 1
-			bStatus = StockRealTimeMarketDataUpdate(idx, nType)
-			time.Sleep(time.Second * 2)
-		}
-		nType = nType + 1
+	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()
+	if err != nil {
+		logx.Errorf("[实时行情数据-A股] [数据库]表[StockDate] 操作[查询]-error:%s", err.Error())
+		return
 	}
 
-	logx.Infof("A股实时行情数据-更新完成.")
+	// nType: 0-流通市值 1-实时行情数据
+	for bStatus == true {
+		idx = idx + 1
+		bStatus = StockRealTimeMarketDataUpdate(idx, nType, tradeDate.StockDate)
+		time.Sleep(time.Second * 2)
+	}
+
+	logx.Infof("[实时行情数据-A股] 操作[更新] 状态[完成].")
 }
 
 // 更新A股实时行情数据
-func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
+func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus bool) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
 	params := url.Values{}
@@ -64,13 +66,13 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 	}
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[实时行情数据-A股] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	// 检查响应状态码
 	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[实时行情数据-A股] 操作[HttpGet] 状态码[%v]error:%s Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
@@ -78,22 +80,21 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Infof("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", strUrl, err.Error())
+		logx.Errorf("[实时行情数据-A股] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	data, ok := respData["data"].(map[string]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:data", strUrl)
+		logx.Errorf("[实时行情数据-A股] 操作[data]  error:不存在")
 		return
 	}
 	diff, ok := data["diff"].([]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:diff", strUrl)
+		logx.Errorf("[实时行情数据-A股] 操作[diff] error:不存在")
 		return
 	}
 
-	now := time.Now()
 	// 解析所需字段并更新到数据库
 	for _, item := range diff {
 		itemMap, ok := item.(map[string]interface{})
@@ -107,7 +108,7 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 		// 检查 Stock 表中是否存在该股票代码
 		rData, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).First()
 		if err != nil || rData == nil {
-			logx.Errorf("MySql Stock Check error:%s", err.Error())
+			logx.Errorf("[实时行情数据-A股] [数据库]表[Stock] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
 			continue
 		}
 
@@ -137,11 +138,11 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 				LowestPrice:  lowestPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
 				Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
 				KlineType:    0, //K线类型(0-日K线,1-周K线,2-月K线)
-				TradingDate:  time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()),
+				TradingDate:  tradeDate,
 			}
 			err = dao.StockDailyMarket.Save(&mData)
 			if err != nil {
-				logx.Errorf("MySql StockDailyMarket Save error:%s", err.Error())
+				logx.Errorf("[实时行情数据-A股] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 				return
 			}
 		} else {
@@ -168,12 +169,12 @@ func StockRealTimeMarketDataUpdate(idx, nType int) (bStatus bool) {
 				UpdatedAt:              time.Now(),
 			})
 			if err != nil {
-				logx.Errorf("MySql Stock Update error:%s", err.Error())
+				logx.Errorf("[实时行情数据-A股] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 				continue
 			}
 
 			if info.RowsAffected < 1 {
-				logx.Errorf("MySql Stock Update error: 更新无效")
+				logx.Errorf("[实时行情数据-A股] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:更新无效", stockCode)
 				continue
 			}
 		}

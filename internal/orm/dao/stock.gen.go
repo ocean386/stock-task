@@ -55,8 +55,8 @@ type stock struct {
 	ALL                    field.Asterisk
 	StockCode              field.String  // 股票代码
 	StockName              field.String  // 股票名称
-	TotalMarketValue       field.Float64 // 总市值
-	CirculatingMarketValue field.Float64 // 流通市值
+	TotalMarketValue       field.Float64 // 总市值(亿)
+	CirculatingMarketValue field.Float64 // 流通市值(亿)
 	PlateType              field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
 	Industry               field.String  // 行业
 	IndustryCode           field.String  // 行业代码
@@ -65,9 +65,9 @@ type stock struct {
 	IncreaseRange          field.Float64 // 涨幅范围
 	IsNewlyListed          field.Int64   // 次新股(0-否 1-是) 上市时间一年以内
 	IsStStock              field.Int64   // ST股票(0-否 1-是)若ST则后期清理数据
-	ListingDate            field.Time    // 上市日期
-	CreatedAt              field.Time    // 创建时间
-	UpdatedAt              field.Time    // 更新时间
+	ListingDate            field.Time
+	CreatedAt              field.Time // 创建时间
+	UpdatedAt              field.Time // 更新时间
 
 	fieldMap map[string]field.Expr
 }

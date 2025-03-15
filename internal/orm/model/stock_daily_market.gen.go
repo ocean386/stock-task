@@ -14,7 +14,7 @@ const TableNameStockDailyMarket = "stock_daily_market"
 type StockDailyMarket struct {
 	StockCode       string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                            // 股票代码
 	StockName       string    `gorm:"column:stock_name;type:varchar(30);not null;comment:股票名称" json:"stock_name"`                              // 股票名称
-	Turnover        float64   `gorm:"column:turnover;type:decimal(10,2);not null;default:0.00;comment:成交额" json:"turnover"`                    // 成交额
+	Turnover        float64   `gorm:"column:turnover;type:decimal(10,2);not null;default:0.00;comment:成交额(亿)" json:"turnover"`                 // 成交额(亿)
 	VolumeRatio     float64   `gorm:"column:volume_ratio;type:decimal(8,2);not null;default:0.00;comment:量比" json:"volume_ratio"`              // 量比
 	TurnoverRate    float64   `gorm:"column:turnover_rate;type:decimal(8,2);not null;default:0.00;comment:换手" json:"turnover_rate"`            // 换手
 	IncreaseRate    float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`            // 涨幅
@@ -28,7 +28,7 @@ type StockDailyMarket struct {
 	IncreaseRate20d float64   `gorm:"column:increase_rate_20d;type:decimal(8,2);not null;default:0.00;comment:20日涨幅" json:"increase_rate_20d"` // 20日涨幅
 	Highest52w      float64   `gorm:"column:highest_52w;type:decimal(8,2);not null;default:0.00;comment:52周最高价" json:"highest_52w"`            // 52周最高价
 	Lowest52w       float64   `gorm:"column:lowest_52w;type:decimal(8,2);not null;default:0.00;comment:52周最低价" json:"lowest_52w"`              // 52周最低价
-	Volume          float64   `gorm:"column:volume;type:decimal(10,1);not null;default:0.0;comment:成交量" json:"volume"`                         // 成交量
+	Volume          float64   `gorm:"column:volume;type:decimal(10,1);not null;default:0.0;comment:成交量(万手)" json:"volume"`                     // 成交量(万手)
 	KlineType       int64     `gorm:"column:kline_type;type:tinyint(4);not null;comment:K线类型(0-日K线,1-周K线,2-月K线)" json:"kline_type"`            // K线类型(0-日K线,1-周K线,2-月K线)
 	TradingDate     time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                               // 交易日期
 	UpdatedAt       time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                    // 更新时间

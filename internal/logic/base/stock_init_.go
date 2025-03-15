@@ -45,7 +45,7 @@ func StockTask() {
 
 }
 
-// 判断股票为次新股
+// 更新个股为次新股
 func IsStockNew() {
 
 	now := time.Now()
@@ -73,12 +73,12 @@ func IsStockNew() {
 
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("IsStockNew-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[更新个股为次新股] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	if statusCode != http.StatusOK {
-		logx.Errorf("IsStockNew-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[更新个股为次新股] 操作[HttpGet] 状态码[%v] Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
@@ -86,23 +86,18 @@ func IsStockNew() {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Infof("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", strUrl, err.Error())
-		return
-	}
-
-	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-StatusCode:%v", strUrl, statusCode)
+		logx.Errorf("[更新个股为次新股] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	poolData, ok := respData["data"].(map[string]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", strUrl)
+		logx.Errorf("[更新个股为次新股] 操作[data] error:不存在")
 		return
 	}
 	dataList, ok := poolData["pool"].([]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:data", strUrl)
+		logx.Errorf("[更新个股为次新股] 操作[pool] error:不存在")
 		return
 	}
 
@@ -118,23 +113,22 @@ func IsStockNew() {
 			UpdatedAt:     time.Now(),
 		})
 		if err != nil {
-			logx.Errorf("MySql Stock Update error:%s", err.Error())
+			logx.Errorf("[更新个股为次新股] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 			return
 		}
 
 		if info.RowsAffected < 1 {
-			logx.Errorf("MySql Stock Update error: 更新无效")
+			logx.Errorf("[更新个股为次新股] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:更新无效", stockCode)
 			return
 		}
 	}
-
 }
 
 func StockIndustryBatchUpdate() {
 
 	stockList, err := dao.Stock.Where(dao.Stock.Industry.Eq("")).Find()
 	if err != nil {
-		logx.Errorf("dao stock find db error:%s", err.Error())
+		logx.Errorf("[更新个股所属行业] [数据库]表[Stock] 操作[查询] error:%v", err)
 		return
 	}
 
@@ -153,7 +147,7 @@ func StockIndustryBatchUpdate() {
 	}
 }
 
-// 获取个股所属行业
+// 更新个股所属行业
 func GetStockIndustry(strSecID, strStockCode string) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/stock/get"
@@ -175,13 +169,13 @@ func GetStockIndustry(strSecID, strStockCode string) {
 	}
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[更新个股所属行业] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	// 检查响应状态码
 	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[更新个股所属行业] 操作[HttpGet] 状态码[%v] Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
@@ -189,25 +183,20 @@ func GetStockIndustry(strSecID, strStockCode string) {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Infof("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", strUrl, err.Error())
-		return
-	}
-
-	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-StatusCode:%v", strUrl, statusCode)
+		logx.Errorf("[更新个股所属行业] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	data, ok := respData["data"].(map[string]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", strUrl)
+		logx.Errorf("[更新个股所属行业] 操作[data] error:不存在")
 		return
 	}
 	strIndustryName, ok1 := data["f127"].(string)
 	strIndustryCode, ok2 := data["f198"].(string)
 
 	if !ok1 || !ok2 {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:data", strUrl)
+		logx.Errorf("[更新个股所属行业] 操作[data] error:f127,f128不存在")
 		return
 	}
 
@@ -217,15 +206,14 @@ func GetStockIndustry(strSecID, strStockCode string) {
 		UpdatedAt:    time.Now(),
 	})
 	if err != nil {
-		logx.Errorf("MySql Stock Update error:%s", err.Error())
+		logx.Errorf("[更新个股所属行业] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", strStockCode, err)
 		return
 	}
 
 	if info.RowsAffected < 1 {
-		logx.Errorf("MySql Stock Update error: 更新无效")
+		logx.Errorf("[更新个股所属行业] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:更新无效", strStockCode)
 		return
 	}
-
 }
 
 // GetStockListSZ HTTP Get 请求 深圳交易所-股票列表
@@ -259,20 +247,20 @@ func GetStockListSZ(showType string) {
 
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[深圳交易所-股票列表] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	// 检查响应状态码
 	if statusCode != 200 {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[深圳交易所-股票列表] 操作[HttpGet] 状态码[%v] Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
 	// 解析 Excel 文件
 	xlFile, err := xlsx.OpenBinary(respBytes)
 	if err != nil {
-		logx.Errorf("RequestHttp,helper.Response-ExcelUnmarshal,[%s]-error:%s", strUrl, err.Error())
+		logx.Errorf("[深圳交易所-股票列表] 操作[xlsx.OpenBinary] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
@@ -306,10 +294,10 @@ func GetStockListSZ(showType string) {
 					CreatedAt:     time.Now(),
 					UpdatedAt:     time.Now(),
 				}
-				logx.Infof("Code:%v Name:%v Date:%v", stockCode, stockName, listDate)
+
 				err = dao.Stock.Save(&data)
 				if err != nil {
-					logx.Errorf("MySql Stock Save error:%s", err.Error())
+					logx.Errorf("[深圳交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 					return
 				}
 			}
@@ -356,13 +344,13 @@ func GetStockListSH(stockType int) {
 	}
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[上海交易所-股票列表] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	// 检查响应状态码
 	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[上海交易所-股票列表] 操作[HttpGet] 状态码[%v] Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
@@ -370,24 +358,18 @@ func GetStockListSH(stockType int) {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Infof("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", strUrl, err.Error())
+		logx.Errorf("[上海交易所-股票列表] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
-	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-StatusCode:%v", strUrl, statusCode)
-		return
-	}
-
-	// 获取 pageHelp 中的 data 列表
 	pageHelp, ok := respData["pageHelp"].(map[string]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", strUrl)
+		logx.Errorf("[上海交易所-股票列表] 操作[pageHelp] error:不存在")
 		return
 	}
 	dataList, ok := pageHelp["data"].([]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:data", strUrl)
+		logx.Errorf("[上海交易所-股票列表] 操作[data] error:不存在")
 		return
 	}
 
@@ -419,7 +401,7 @@ func GetStockListSH(stockType int) {
 		}
 		err = dao.Stock.Save(&data)
 		if err != nil {
-			logx.Errorf("MySql Stock Save error:%s", err.Error())
+			logx.Errorf("[上海交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 			return
 		}
 	}
@@ -452,15 +434,14 @@ func GetStockListBJ() {
 	var respBytes []byte
 	var statusCode int
 	var err error
-	currentUrl := strUrl
-	respBytes, statusCode, err = internalHttp.HttpPost(false, currentUrl, []byte(params.Encode()), headers)
+	respBytes, statusCode, err = internalHttp.HttpPost(false, strUrl, []byte(params.Encode()), headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpPost,[%s]-error:%s", currentUrl, err.Error())
+		logx.Errorf("[北京交易所-股票列表] 操作[HttpPost] error:%s Url地址[%s]", err.Error(), strUrl)
 		return
 	}
 
 	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-HttpPost,[%s]-statusCode:%v", currentUrl, statusCode)
+		logx.Errorf("[北京交易所-股票列表] 操作[HttpPost] 状态码[%v] Url地址[%s]", statusCode, strUrl)
 		return
 	}
 
@@ -469,7 +450,7 @@ func GetStockListBJ() {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Errorf("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", currentUrl, err.Error())
+		logx.Errorf("[北京交易所-股票列表] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), strUrl)
 		return
 	}
 
@@ -486,14 +467,14 @@ func GetStockListBJ() {
 		if page > 0 {
 			params.Set("page", fmt.Sprintf("%d", page))
 
-			respBytes, statusCode, err = internalHttp.HttpPost(false, currentUrl, []byte(params.Encode()), headers)
+			respBytes, statusCode, err = internalHttp.HttpPost(false, strUrl, []byte(params.Encode()), headers)
 			if err != nil {
-				logx.Errorf("RequestHttp-HttpPost,[%s]-error:%s", currentUrl, err.Error())
+				logx.Errorf("[北京交易所-股票列表] 操作[HttpPost] error:%s Url地址[%s]", err.Error(), strUrl)
 				return
 			}
 
 			if statusCode != http.StatusOK {
-				logx.Errorf("RequestHttp-HttpPost,[%s]-statusCode:%v", currentUrl, statusCode)
+				logx.Errorf("[北京交易所-股票列表] 操作[HttpPost] 状态码[%v] Url地址[%s]", statusCode, strUrl)
 				return
 			}
 
@@ -501,7 +482,7 @@ func GetStockListBJ() {
 			respBytes = []byte(strings.Replace(strResp, "])", "", 1))
 			err = internalHttp.JsonUnmarshal(respBytes, &respData)
 			if err != nil {
-				logx.Errorf("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", currentUrl, err.Error())
+				logx.Errorf("[北京交易所-股票列表] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), strUrl)
 				return
 			}
 		}
@@ -533,13 +514,13 @@ func GetStockListBJ() {
 						}
 						err = dao.Stock.Save(&data)
 						if err != nil {
-							logx.Errorf("MySql Stock Save error:%s", err.Error())
+							logx.Errorf("[北京交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 							return
 						}
 					}
 				}
 			}
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 	}
 }

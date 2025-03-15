@@ -28,9 +28,9 @@ func IsThisMonth(t time.Time) bool {
 // 更新A股日K线行情数据-批量
 func StockDailyMarketBatchUpdate() {
 
-	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(2, 3)).Find() //小盘,中盘
+	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(2, 3)).Find() //微盘,小盘,中盘
 	if err != nil {
-		logx.Errorf("dao stock find db error:%s", err.Error())
+		logx.Errorf("[历史行情数据-A股] [数据库]表[Stock] 操作[查询]-error:%s", err.Error())
 		return
 	}
 
@@ -42,7 +42,7 @@ func StockDailyMarketBatchUpdate() {
 		for _, s := range stockList {
 			marketData, err = dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(s.StockCode), dao.StockDailyMarket.KlineType.Eq(klineType)).Order(dao.StockDailyMarket.TradingDate.Desc()).First()
 			if err != nil && err != gorm.ErrRecordNotFound {
-				logx.Errorf("MySql StockDailyMarket table find error:%s", err.Error())
+				logx.Errorf("[历史行情数据-A股] [数据库]表[StockDailyMarket] 操作[查询]-error:%s", err.Error())
 				return
 			}
 
@@ -136,13 +136,13 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	}
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[历史行情数据-A股] 操作[HttpGet] K线级别[%v] error:%s Url地址[%s]", klineType, err.Error(), fullUrl)
 		return
 	}
 
 	// 检查响应状态码
 	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[历史行情数据-A股] 操作[HttpGet] K线级别[%v] 状态码[%v] error:%s Url地址[%s]", klineType, statusCode, fullUrl)
 		return
 	}
 
@@ -150,36 +150,31 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Errorf("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", fullUrl, err.Error())
-		return
-	}
-
-	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-StatusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[历史行情数据-A股] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	data, ok := respData["data"].(map[string]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:pageHelp", fullUrl)
+		logx.Errorf("[历史行情数据-A股] 操作[data] error:不存在")
 		return
 	}
 
 	strStockCode, ok := data["code"].(string)
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:code", fullUrl)
+		logx.Errorf("[历史行情数据-A股] 操作[code] error:不存在")
 		return
 	}
 
 	strName, ok := data["name"].(string)
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:name", fullUrl)
+		logx.Errorf("[历史行情数据-A股] 操作[name] error:不存在")
 		return
 	}
 
 	kData, ok := data["klines"].([]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:klines", fullUrl)
+		logx.Errorf("[历史行情数据-A股] 操作[klines] error:不存在")
 		return
 	}
 
@@ -192,12 +187,12 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	for _, kline := range kData {
 		klineStr, ok := kline.(string)
 		if !ok {
-			logx.Errorf("RequestHttp-http.StatusOK,[%s]-Invalid kline data", fullUrl)
+			logx.Errorf("[历史行情数据-A股] 操作[klines] error:Invalid kline data")
 			continue
 		}
 		fields := strings.Split(klineStr, ",")
 		if len(fields) != 10 {
-			logx.Errorf("RequestHttp-http.StatusOK,[%s]-Invalid kline fields", fullUrl)
+			logx.Errorf("[历史行情数据-A股] 操作[分隔符] error:数据不够")
 			continue
 		}
 		date := fields[0] // 交易日期
@@ -237,7 +232,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	}
 
 	if len(marketSlice) == 0 {
-		logx.Infof("股票代码[%v] 股票简称[%v] 历史行情数据为空.", strStockCode, strName)
+		logx.Infof("[历史行情数据-A股] 股票代码[%v] K线级别[%v] Info:历史行情数据为空", strStockCode, klineType)
 		return
 	}
 
@@ -246,7 +241,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 		if len(marketSlice)/1000 == 0 {
 			err = dao.StockDailyMarket.Save(marketSlice...)
 			if err != nil {
-				logx.Errorf("dao StockDate save db [%v] error:%v", strName, err.Error())
+				logx.Errorf("[历史行情数据-A股] [数据库]表[StockDailyMarket] 操作[插入] 股票代码[%v]-error:%v", strStockCode, err)
 				return
 			}
 			break
@@ -258,11 +253,11 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 			dataSlice := marketSlice[i:end]
 			err = dao.StockDailyMarket.Save(dataSlice...) //批量插入数据
 			if err != nil {
-				logx.Errorf("dao StockDate save db [%v] error:%v", strName, err.Error())
+				logx.Errorf("[历史行情数据-A股][数据库]表[StockDailyMarket] 操作[插入] 股票代码[%v]-error:%v", strStockCode, err)
 				return
 			}
 		}
 	}
 
-	logx.Infof("[%v]-[%v] K线级别[%v]", strStockCode, strName, klineType)
+	logx.Infof("[历史行情数据-A股][数据库]表[StockDailyMarket] 操作[插入] 股票代码[%v] 股票简称[%v] K线级别[%v]", strStockCode, strName, klineType)
 }

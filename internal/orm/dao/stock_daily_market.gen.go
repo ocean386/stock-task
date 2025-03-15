@@ -60,7 +60,7 @@ type stockDailyMarket struct {
 	ALL             field.Asterisk
 	StockCode       field.String  // 股票代码
 	StockName       field.String  // 股票名称
-	Turnover        field.Float64 // 成交额
+	Turnover        field.Float64 // 成交额(亿)
 	VolumeRatio     field.Float64 // 量比
 	TurnoverRate    field.Float64 // 换手
 	IncreaseRate    field.Float64 // 涨幅
@@ -74,7 +74,7 @@ type stockDailyMarket struct {
 	IncreaseRate20d field.Float64 // 20日涨幅
 	Highest52w      field.Float64 // 52周最高价
 	Lowest52w       field.Float64 // 52周最低价
-	Volume          field.Float64 // 成交量
+	Volume          field.Float64 // 成交量(万手)
 	KlineType       field.Int64   // K线类型(0-日K线,1-周K线,2-月K线)
 	TradingDate     field.Time    // 交易日期
 	UpdatedAt       field.Time    // 更新时间

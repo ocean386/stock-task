@@ -13,7 +13,7 @@ const TableNameStockDate = "stock_date"
 // StockDate 交易日期-A股
 type StockDate struct {
 	ID        int64     `gorm:"column:id;type:bigint(20);primaryKey;autoIncrement:true;comment:主键ID" json:"id"` // 主键ID
-	StockDate time.Time `gorm:"column:stock_date;type:timestamp" json:"stock_date"`
+	StockDate time.Time `gorm:"column:stock_date;type:date;not null;default:2015-01-01" json:"stock_date"`
 }
 
 // TableName StockDate's table name

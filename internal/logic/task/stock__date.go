@@ -15,8 +15,6 @@ import (
 // 更新A股交易日期
 func StockDateUpdate() {
 
-	logx.Infof("执行 StockHTTP 任务:%v", time.Now().Format("15:04:05"))
-
 	// 构建请求参数
 	nextMonth := time.Now().AddDate(0, 1, 0).Format("2006-01")
 	params := url.Values{}
@@ -39,12 +37,12 @@ func StockDateUpdate() {
 
 	respBytes, statusCode, err := internalHttp.HttpGet(false, fullUrl, headers)
 	if err != nil {
-		logx.Errorf("IsStockNew-HttpGet,[%s]-error:%s", fullUrl, err.Error())
+		logx.Errorf("[更新A股交易日期] 操作[HttpGet] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	if statusCode != http.StatusOK {
-		logx.Errorf("IsStockNew-HttpGet,[%s]-statusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[更新A股交易日期] 操作[HttpGet] 状态码[%v] Url地址[%s]", statusCode, fullUrl)
 		return
 	}
 
@@ -55,18 +53,13 @@ func StockDateUpdate() {
 	var respData map[string]interface{}
 	err = internalHttp.JsonUnmarshal(respBytes, &respData)
 	if err != nil {
-		logx.Infof("RequestHttp,helper.Response-JsonUnmarshal,[%s]-error:%s", fullUrl, err.Error())
-		return
-	}
-
-	if statusCode != http.StatusOK {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-StatusCode:%v", fullUrl, statusCode)
+		logx.Errorf("[更新A股交易日期] 操作[JsonUnmarshal] error:%s Url地址[%s]", err.Error(), fullUrl)
 		return
 	}
 
 	dateList, ok := respData["data"].([]interface{})
 	if !ok {
-		logx.Errorf("RequestHttp-http.StatusOK,[%s]-Response filed:data", fullUrl)
+		logx.Errorf("[更新A股交易日期] 操作[data] error:不存在")
 		return
 	}
 
@@ -88,14 +81,14 @@ func StockDateUpdate() {
 
 		tData, err := time.Parse("2006-01-02", tradeDate)
 		if err != nil {
-			logx.Errorf("日期解析出错: %v，日期字符串: %s", err, tradeDate)
+			logx.Errorf("[更新A股交易日期] 操作[日期解析] 日期字符串[%s] error:%v", tradeDate, err)
 			return
 		}
 
 		date := &model.StockDate{StockDate: tData}
 		err = dao.StockDate.Save(date)
 		if err != nil {
-			logx.Errorf("dao StockDate save db [%v] error:%v", tradeDate, err.Error())
+			logx.Errorf("[更新A股交易日期] [数据库]表[StockDate] 操作[插入] error:%v", err)
 			return
 		}
 	}
