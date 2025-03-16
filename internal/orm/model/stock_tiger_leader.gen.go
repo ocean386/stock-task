@@ -12,10 +12,11 @@ const TableNameStockTigerLeader = "stock_tiger_leader"
 
 // StockTigerLeader 股票列表-龙虎榜
 type StockTigerLeader struct {
-	StockCode              string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                                         // 股票代码
+	ID                     int64     `gorm:"column:id;type:bigint(20);primaryKey;comment:主键ID" json:"id"`                                                          // 主键ID
+	StockCode              string    `gorm:"column:stock_code;type:varchar(10);not null;comment:股票代码" json:"stock_code"`                                           // 股票代码
 	StockName              string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                                           // 股票名称
 	CirculatingMarketValue float64   `gorm:"column:circulating_market_value;type:decimal(8,2);not null;default:0.00;comment:流通市值" json:"circulating_market_value"` // 流通市值
-	PlateType              int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-小盘,2-中盘,3-大盘)" json:"plate_type"`                       // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
+	PlateType              int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"`                 // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
 	VolumeRatio            float64   `gorm:"column:volume_ratio;type:decimal(8,2);not null;default:0.00;comment:量比" json:"volume_ratio"`                           // 量比
 	TurnoverRate           float64   `gorm:"column:turnover_rate;type:decimal(8,2);not null;default:0.00;comment:换手" json:"turnover_rate"`                         // 换手
 	IncreaseRate           float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`                         // 涨幅
@@ -24,18 +25,19 @@ type StockTigerLeader struct {
 	OpeningPrice           float64   `gorm:"column:opening_price;type:decimal(8,2);not null;default:0.00;comment:开盘" json:"opening_price"`                         // 开盘
 	HighestPrice           float64   `gorm:"column:highest_price;type:decimal(8,2);not null;default:0.00;comment:最高" json:"highest_price"`                         // 最高
 	LowestPrice            float64   `gorm:"column:lowest_price;type:decimal(8,2);not null;default:0.00;comment:最低" json:"lowest_price"`                           // 最低
-	TradingDate            time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:上榜日期" json:"trading_date"`                                            // 上榜日期
-	IsOrganization         int64     `gorm:"column:is_organization;type:tinyint(4);not null;comment:机构榜(0-否 1-是)" json:"is_organization"`                          // 机构榜(0-否 1-是)
+	TradingDate            time.Time `gorm:"column:trading_date;type:date;not null;comment:上榜日期" json:"trading_date"`                                              // 上榜日期
+	IsOrg                  int64     `gorm:"column:is_org;type:tinyint(4);not null;comment:机构榜(0-否 1-是)" json:"is_org"`                                            // 机构榜(0-否 1-是)
+	OrgTlabel              string    `gorm:"column:org_tlabel;type:varchar(100);not null;comment:机构标签" json:"org_tlabel"`                                          // 机构标签
 	IsHotMoney             int64     `gorm:"column:is_hot_money;type:tinyint(4);not null;comment:游资榜(0-否 1-是)" json:"is_hot_money"`                                // 游资榜(0-否 1-是)
-	IsBusiness             int64     `gorm:"column:is_business;type:tinyint(4);not null;comment:营业部(0-否 1-是)" json:"is_business"`                                  // 营业部(0-否 1-是)
-	ContinuousLeaderTimes  int64     `gorm:"column:continuous_leader_times;type:int(11);not null;comment:连续上榜次数" json:"continuous_leader_times"`                   // 连续上榜次数
-	Last1MonthLeaderTimes  int64     `gorm:"column:last_1_month_leader_times;type:int(11);not null;comment:近1个月上榜次数" json:"last_1_month_leader_times"`             // 近1个月上榜次数
-	Last2MonthsLeaderTimes int64     `gorm:"column:last_2_months_leader_times;type:int(11);not null;comment:近3个月上榜次数" json:"last_2_months_leader_times"`           // 近3个月上榜次数
-	Last3MonthsLeaderTimes int64     `gorm:"column:last_3_months_leader_times;type:int(11);not null;comment:近6个月上榜次数" json:"last_3_months_leader_times"`           // 近6个月上榜次数
-	AnnualLeaderTimes      int64     `gorm:"column:annual_leader_times;type:int(11);not null;comment:近一年上榜次数" json:"annual_leader_times"`                          // 近一年上榜次数
+	HotMoneyName           string    `gorm:"column:hot_money_name;type:varchar(50);not null;comment:游资名称" json:"hot_money_name"`                                   // 游资名称
+	HotTlabel              string    `gorm:"column:hot_tlabel;type:varchar(50);not null;comment:游资标签" json:"hot_tlabel"`                                           // 游资标签
+	ContinuousLeaderTimes  int64     `gorm:"column:continuous_leader_times;type:tinyint(4);not null;comment:连续上榜次数" json:"continuous_leader_times"`                // 连续上榜次数
+	Last1monthLeaderTimes  int64     `gorm:"column:last_1month_leader_times;type:tinyint(4);not null;comment:近1个月上榜次数" json:"last_1month_leader_times"`            // 近1个月上榜次数
+	Last3monthsLeaderTimes int64     `gorm:"column:last_3months_leader_times;type:tinyint(4);not null;comment:近3个月上榜次数" json:"last_3months_leader_times"`          // 近3个月上榜次数
+	Last6monthsLeaderTimes int64     `gorm:"column:last_6months_leader_times;type:tinyint(4);not null;comment:近6个月上榜次数" json:"last_6months_leader_times"`          // 近6个月上榜次数
+	AnnualLeaderTimes      int64     `gorm:"column:annual_leader_times;type:tinyint(4);not null;comment:近一年上榜次数" json:"annual_leader_times"`                       // 近一年上榜次数
 	Industry               string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                                 // 行业
 	IndustryCode           string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                                     // 行业代码
-	Exchange               int64     `gorm:"column:exchange;type:tinyint(4);not null;comment:交易所(0-全部,1-深圳,2-上海,3-北京)" json:"exchange"`                            // 交易所(0-全部,1-深圳,2-上海,3-北京)
 	UpdatedAt              time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                                 // 更新时间
 }
 

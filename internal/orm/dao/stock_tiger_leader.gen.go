@@ -27,6 +27,7 @@ func newStockTigerLeader(db *gorm.DB, opts ...gen.DOOption) stockTigerLeader {
 
 	tableName := _stockTigerLeader.stockTigerLeaderDo.TableName()
 	_stockTigerLeader.ALL = field.NewAsterisk(tableName)
+	_stockTigerLeader.ID = field.NewInt64(tableName, "id")
 	_stockTigerLeader.StockCode = field.NewString(tableName, "stock_code")
 	_stockTigerLeader.StockName = field.NewString(tableName, "stock_name")
 	_stockTigerLeader.CirculatingMarketValue = field.NewFloat64(tableName, "circulating_market_value")
@@ -40,17 +41,18 @@ func newStockTigerLeader(db *gorm.DB, opts ...gen.DOOption) stockTigerLeader {
 	_stockTigerLeader.HighestPrice = field.NewFloat64(tableName, "highest_price")
 	_stockTigerLeader.LowestPrice = field.NewFloat64(tableName, "lowest_price")
 	_stockTigerLeader.TradingDate = field.NewTime(tableName, "trading_date")
-	_stockTigerLeader.IsOrganization = field.NewInt64(tableName, "is_organization")
+	_stockTigerLeader.IsOrg = field.NewInt64(tableName, "is_org")
+	_stockTigerLeader.OrgTlabel = field.NewString(tableName, "org_tlabel")
 	_stockTigerLeader.IsHotMoney = field.NewInt64(tableName, "is_hot_money")
-	_stockTigerLeader.IsBusiness = field.NewInt64(tableName, "is_business")
+	_stockTigerLeader.HotMoneyName = field.NewString(tableName, "hot_money_name")
+	_stockTigerLeader.HotTlabel = field.NewString(tableName, "hot_tlabel")
 	_stockTigerLeader.ContinuousLeaderTimes = field.NewInt64(tableName, "continuous_leader_times")
-	_stockTigerLeader.Last1MonthLeaderTimes = field.NewInt64(tableName, "last_1_month_leader_times")
-	_stockTigerLeader.Last2MonthsLeaderTimes = field.NewInt64(tableName, "last_2_months_leader_times")
-	_stockTigerLeader.Last3MonthsLeaderTimes = field.NewInt64(tableName, "last_3_months_leader_times")
+	_stockTigerLeader.Last1monthLeaderTimes = field.NewInt64(tableName, "last_1month_leader_times")
+	_stockTigerLeader.Last3monthsLeaderTimes = field.NewInt64(tableName, "last_3months_leader_times")
+	_stockTigerLeader.Last6monthsLeaderTimes = field.NewInt64(tableName, "last_6months_leader_times")
 	_stockTigerLeader.AnnualLeaderTimes = field.NewInt64(tableName, "annual_leader_times")
 	_stockTigerLeader.Industry = field.NewString(tableName, "industry")
 	_stockTigerLeader.IndustryCode = field.NewString(tableName, "industry_code")
-	_stockTigerLeader.Exchange = field.NewInt64(tableName, "exchange")
 	_stockTigerLeader.UpdatedAt = field.NewTime(tableName, "updated_at")
 
 	_stockTigerLeader.fillFieldMap()
@@ -63,10 +65,11 @@ type stockTigerLeader struct {
 	stockTigerLeaderDo
 
 	ALL                    field.Asterisk
+	ID                     field.Int64   // 主键ID
 	StockCode              field.String  // 股票代码
 	StockName              field.String  // 股票名称
 	CirculatingMarketValue field.Float64 // 流通市值
-	PlateType              field.Int64   // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
+	PlateType              field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
 	VolumeRatio            field.Float64 // 量比
 	TurnoverRate           field.Float64 // 换手
 	IncreaseRate           field.Float64 // 涨幅
@@ -76,17 +79,18 @@ type stockTigerLeader struct {
 	HighestPrice           field.Float64 // 最高
 	LowestPrice            field.Float64 // 最低
 	TradingDate            field.Time    // 上榜日期
-	IsOrganization         field.Int64   // 机构榜(0-否 1-是)
+	IsOrg                  field.Int64   // 机构榜(0-否 1-是)
+	OrgTlabel              field.String  // 机构标签
 	IsHotMoney             field.Int64   // 游资榜(0-否 1-是)
-	IsBusiness             field.Int64   // 营业部(0-否 1-是)
+	HotMoneyName           field.String  // 游资名称
+	HotTlabel              field.String  // 游资标签
 	ContinuousLeaderTimes  field.Int64   // 连续上榜次数
-	Last1MonthLeaderTimes  field.Int64   // 近1个月上榜次数
-	Last2MonthsLeaderTimes field.Int64   // 近3个月上榜次数
-	Last3MonthsLeaderTimes field.Int64   // 近6个月上榜次数
+	Last1monthLeaderTimes  field.Int64   // 近1个月上榜次数
+	Last3monthsLeaderTimes field.Int64   // 近3个月上榜次数
+	Last6monthsLeaderTimes field.Int64   // 近6个月上榜次数
 	AnnualLeaderTimes      field.Int64   // 近一年上榜次数
 	Industry               field.String  // 行业
 	IndustryCode           field.String  // 行业代码
-	Exchange               field.Int64   // 交易所(0-全部,1-深圳,2-上海,3-北京)
 	UpdatedAt              field.Time    // 更新时间
 
 	fieldMap map[string]field.Expr
@@ -104,6 +108,7 @@ func (s stockTigerLeader) As(alias string) *stockTigerLeader {
 
 func (s *stockTigerLeader) updateTableName(table string) *stockTigerLeader {
 	s.ALL = field.NewAsterisk(table)
+	s.ID = field.NewInt64(table, "id")
 	s.StockCode = field.NewString(table, "stock_code")
 	s.StockName = field.NewString(table, "stock_name")
 	s.CirculatingMarketValue = field.NewFloat64(table, "circulating_market_value")
@@ -117,17 +122,18 @@ func (s *stockTigerLeader) updateTableName(table string) *stockTigerLeader {
 	s.HighestPrice = field.NewFloat64(table, "highest_price")
 	s.LowestPrice = field.NewFloat64(table, "lowest_price")
 	s.TradingDate = field.NewTime(table, "trading_date")
-	s.IsOrganization = field.NewInt64(table, "is_organization")
+	s.IsOrg = field.NewInt64(table, "is_org")
+	s.OrgTlabel = field.NewString(table, "org_tlabel")
 	s.IsHotMoney = field.NewInt64(table, "is_hot_money")
-	s.IsBusiness = field.NewInt64(table, "is_business")
+	s.HotMoneyName = field.NewString(table, "hot_money_name")
+	s.HotTlabel = field.NewString(table, "hot_tlabel")
 	s.ContinuousLeaderTimes = field.NewInt64(table, "continuous_leader_times")
-	s.Last1MonthLeaderTimes = field.NewInt64(table, "last_1_month_leader_times")
-	s.Last2MonthsLeaderTimes = field.NewInt64(table, "last_2_months_leader_times")
-	s.Last3MonthsLeaderTimes = field.NewInt64(table, "last_3_months_leader_times")
+	s.Last1monthLeaderTimes = field.NewInt64(table, "last_1month_leader_times")
+	s.Last3monthsLeaderTimes = field.NewInt64(table, "last_3months_leader_times")
+	s.Last6monthsLeaderTimes = field.NewInt64(table, "last_6months_leader_times")
 	s.AnnualLeaderTimes = field.NewInt64(table, "annual_leader_times")
 	s.Industry = field.NewString(table, "industry")
 	s.IndustryCode = field.NewString(table, "industry_code")
-	s.Exchange = field.NewInt64(table, "exchange")
 	s.UpdatedAt = field.NewTime(table, "updated_at")
 
 	s.fillFieldMap()
@@ -145,7 +151,8 @@ func (s *stockTigerLeader) GetFieldByName(fieldName string) (field.OrderExpr, bo
 }
 
 func (s *stockTigerLeader) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 25)
+	s.fieldMap = make(map[string]field.Expr, 27)
+	s.fieldMap["id"] = s.ID
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["circulating_market_value"] = s.CirculatingMarketValue
@@ -159,17 +166,18 @@ func (s *stockTigerLeader) fillFieldMap() {
 	s.fieldMap["highest_price"] = s.HighestPrice
 	s.fieldMap["lowest_price"] = s.LowestPrice
 	s.fieldMap["trading_date"] = s.TradingDate
-	s.fieldMap["is_organization"] = s.IsOrganization
+	s.fieldMap["is_org"] = s.IsOrg
+	s.fieldMap["org_tlabel"] = s.OrgTlabel
 	s.fieldMap["is_hot_money"] = s.IsHotMoney
-	s.fieldMap["is_business"] = s.IsBusiness
+	s.fieldMap["hot_money_name"] = s.HotMoneyName
+	s.fieldMap["hot_tlabel"] = s.HotTlabel
 	s.fieldMap["continuous_leader_times"] = s.ContinuousLeaderTimes
-	s.fieldMap["last_1_month_leader_times"] = s.Last1MonthLeaderTimes
-	s.fieldMap["last_2_months_leader_times"] = s.Last2MonthsLeaderTimes
-	s.fieldMap["last_3_months_leader_times"] = s.Last3MonthsLeaderTimes
+	s.fieldMap["last_1month_leader_times"] = s.Last1monthLeaderTimes
+	s.fieldMap["last_3months_leader_times"] = s.Last3monthsLeaderTimes
+	s.fieldMap["last_6months_leader_times"] = s.Last6monthsLeaderTimes
 	s.fieldMap["annual_leader_times"] = s.AnnualLeaderTimes
 	s.fieldMap["industry"] = s.Industry
 	s.fieldMap["industry_code"] = s.IndustryCode
-	s.fieldMap["exchange"] = s.Exchange
 	s.fieldMap["updated_at"] = s.UpdatedAt
 }
 
