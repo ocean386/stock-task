@@ -14,7 +14,7 @@ import (
 )
 
 // 更新个股资金流排名-批量
-func StockFundsRankBatchUpdate() {
+func StockFundRankBatchUpdate() {
 
 	var (
 		bStatus bool
@@ -28,7 +28,7 @@ func StockFundsRankBatchUpdate() {
 	}
 
 	for bStatus == true {
-		bStatus = StockFundsRankUpdate(pageIdx, tradeDate.StockDate) //净额
+		bStatus = StockFundRankUpdate(pageIdx, tradeDate.StockDate) //净额
 		pageIdx = pageIdx + 1
 		time.Sleep(time.Second * 2)
 	}
@@ -41,32 +41,32 @@ func StockFundsRankBatchUpdate() {
 // 主力净流入占比排序
 func StockMainPercentSort(tradeDate time.Time) {
 
-	stockFunds, err := dao.StockFundsRank.Select(dao.StockFundsRank.StockCode).Where(dao.StockFundsRank.TradingDate.Eq(tradeDate)).Order(dao.StockFundsRank.MainPercent.Desc()).Find()
+	stockFunds, err := dao.StockFundRank.Select(dao.StockFundRank.StockCode).Where(dao.StockFundRank.TradingDate.Eq(tradeDate)).Order(dao.StockFundRank.MainPercent.Desc()).Find()
 	if err != nil {
-		logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundsRank] 操作[查询]-error:%s", err.Error())
+		logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundRank] 操作[查询]-error:%s", err.Error())
 		return
 	}
 
 	for idx, s := range stockFunds {
-		info, err := dao.StockFundsRank.Where(dao.StockFundsRank.StockCode.Eq(s.StockCode)).Updates(model.StockFundsRank{
+		info, err := dao.StockFundRank.Where(dao.StockFundRank.StockCode.Eq(s.StockCode)).Updates(model.StockFundRank{
 			FundPercentSortID: int64(idx + 1),
 			UpdatedAt:         time.Now(),
 		},
 		)
 		if err != nil {
-			logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundsRank] 操作[更新] 股票代码[%v]-error:%v", s.StockCode, err)
+			logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundRank] 操作[更新] 股票代码[%v]-error:%v", s.StockCode, err)
 			return
 		}
 
 		if info.RowsAffected < 1 {
-			logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundsRank] 操作[更新] 股票代码[%v]-error:更新无效", s.StockCode)
+			logx.Errorf("[更新个股资金流排名] [数据库]表[StockFundRank] 操作[更新] 股票代码[%v]-error:更新无效", s.StockCode)
 			return
 		}
 	}
 }
 
 // 更新个股资金净流入排名
-func StockFundsRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
+func StockFundRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
 
 	nSortID := pageIdx*100 + 1
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
@@ -150,7 +150,7 @@ func StockFundsRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
 		superFund := decimal.NewFromFloat(cast.ToFloat64(itemMap["f66"]))    //超大单净流入(亿)
 		superPercent := decimal.NewFromFloat(cast.ToFloat64(itemMap["f69"])) //超大单净流入占比
 
-		sData := model.StockFundsRank{
+		sData := model.StockFundRank{
 			StockCode:    stockCode,
 			StockName:    stockName,
 			PlateType:    rData.PlateType,
@@ -169,9 +169,9 @@ func StockFundsRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
 			UpdatedAt:    time.Now(),
 		}
 
-		err = dao.StockFundsRank.Save(&sData)
+		err = dao.StockFundRank.Save(&sData)
 		if err != nil {
-			logx.Errorf("[更新个股资金净流入排名] [数据库]表[StockFundsRank] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+			logx.Errorf("[更新个股资金净流入排名] [数据库]表[StockFundRank] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 			return
 		}
 
