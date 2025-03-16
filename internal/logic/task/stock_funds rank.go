@@ -14,10 +14,9 @@ import (
 )
 
 // 更新个股资金流排名-批量
-func StockFundsRankBatchUpdate(nType int64) {
+func StockFundsRankBatchUpdate() {
 
 	var (
-		strFid  string
 		bStatus bool
 		pageIdx int64
 	)
@@ -28,20 +27,13 @@ func StockFundsRankBatchUpdate(nType int64) {
 		return
 	}
 
-	//#净额:f62-今日 净占比:f184-今日
-	if nType == 0 { // nType: 0-净额 1-净占比
-		strFid = "f62"
-	} else {
-		strFid = "f184"
-	}
-
 	for bStatus == true {
-		bStatus = StockFundsRankUpdate(strFid, pageIdx, nType, tradeDate.StockDate)
+		bStatus = StockFundsRankUpdate(pageIdx, tradeDate.StockDate) //净额
 		pageIdx = pageIdx + 1
 		time.Sleep(time.Second * 2)
 	}
 
-	StockMainPercentSort(tradeDate.StockDate)
+	StockMainPercentSort(tradeDate.StockDate) //净占比
 
 	logx.Infof("[更新个股资金流排名] 操作[更新] 状态[完成].")
 }
@@ -74,7 +66,7 @@ func StockMainPercentSort(tradeDate time.Time) {
 }
 
 // 更新个股资金净流入排名
-func StockFundsRankUpdate(strFid string, pageIdx, nType int64, tradeDate time.Time) (bStatus bool) {
+func StockFundsRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
 
 	nSortID := pageIdx*100 + 1
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
@@ -84,7 +76,7 @@ func StockFundsRankUpdate(strFid string, pageIdx, nType int64, tradeDate time.Ti
 	params.Add("invt", "2")
 	params.Add("fs", "m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2")
 	params.Add("fields", "f2,f3,f7,f8,f10,f12,f14,f62,f184,f66,f69")
-	params.Add("fid", strFid)                      // #净额:f62-今日  净占比:f184-今日
+	params.Add("fid", "f62")                       // #净额:f62-今日  净占比:f184-今日
 	params.Add("pn", fmt.Sprintf("%v", pageIdx+1)) // 翻页
 	params.Add("pz", "100")                        // 大小
 	params.Add("po", "1")
@@ -166,6 +158,7 @@ func StockFundsRankUpdate(strFid string, pageIdx, nType int64, tradeDate time.Ti
 			MainPercent:  mainPercent.InexactFloat64(),
 			SuperFund:    superFund.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
 			SuperPercent: superPercent.InexactFloat64(),
+			FundSortID:   nSortID, //净流入排名
 			VolumeRatio:  volumeRatio.InexactFloat64(),
 			TurnoverRate: turnoverRate.InexactFloat64(),
 			IncreaseRate: increaseRate.InexactFloat64(),
@@ -174,12 +167,6 @@ func StockFundsRankUpdate(strFid string, pageIdx, nType int64, tradeDate time.Ti
 			Industry:     rData.Industry,
 			IndustryCode: rData.IndustryCode,
 			UpdatedAt:    time.Now(),
-		}
-
-		if nType == 0 {
-			sData.FundSortID = nSortID //净流入排名
-		} else {
-			sData.FundPercentSortID = nSortID //净占比排名
 		}
 
 		err = dao.StockFundsRank.Save(&sData)

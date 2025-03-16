@@ -32,7 +32,7 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 
 	//go task.StockDailyMarketBatchUpdate()
 	//go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
-	go task.StockFundsRankBatchUpdate(0) // nType: 0-净额 1-净占比
+	go task.StockFundsRankBatchUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
