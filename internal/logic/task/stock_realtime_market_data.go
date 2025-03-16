@@ -43,7 +43,7 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
 	params := url.Values{}
 	params.Add("np", "1")
-	params.Add("fltt", "1")
+	params.Add("fltt", "2")
 	params.Add("invt", "2")
 	params.Add("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048")
 	params.Add("fields", "f2,f3,f5,f6,f7,f8,f10,f12,f14,f15,f16,f17,f20,f21")
@@ -128,14 +128,14 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 				StockCode:    stockCode,
 				StockName:    stockName,
 				Turnover:     turnover.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
-				VolumeRatio:  volumeRatio.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				TurnoverRate: turnoverRate.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				IncreaseRate: increaseRate.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				Amplitude:    amplitude.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				CurrentPrice: currentPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				OpeningPrice: openingPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				HighestPrice: highestPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
-				LowestPrice:  lowestPrice.Div(decimal.NewFromInt(100)).InexactFloat64(),
+				VolumeRatio:  volumeRatio.InexactFloat64(),
+				TurnoverRate: turnoverRate.InexactFloat64(),
+				IncreaseRate: increaseRate.InexactFloat64(),
+				Amplitude:    amplitude.InexactFloat64(),
+				CurrentPrice: currentPrice.InexactFloat64(),
+				OpeningPrice: openingPrice.InexactFloat64(),
+				HighestPrice: highestPrice.InexactFloat64(),
+				LowestPrice:  lowestPrice.InexactFloat64(),
 				Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
 				KlineType:    0, //K线类型(0-日K线,1-周K线,2-月K线)
 				TradingDate:  tradeDate,

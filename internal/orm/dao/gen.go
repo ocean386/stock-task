@@ -20,6 +20,8 @@ var (
 	Stock            *stock
 	StockDailyMarket *stockDailyMarket
 	StockDate        *stockDate
+	StockFundsRank   *stockFundsRank
+	StockTigerLeader *stockTigerLeader
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -27,6 +29,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Stock = &Q.Stock
 	StockDailyMarket = &Q.StockDailyMarket
 	StockDate = &Q.StockDate
+	StockFundsRank = &Q.StockFundsRank
+	StockTigerLeader = &Q.StockTigerLeader
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -35,6 +39,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Stock:            newStock(db, opts...),
 		StockDailyMarket: newStockDailyMarket(db, opts...),
 		StockDate:        newStockDate(db, opts...),
+		StockFundsRank:   newStockFundsRank(db, opts...),
+		StockTigerLeader: newStockTigerLeader(db, opts...),
 	}
 }
 
@@ -44,6 +50,8 @@ type Query struct {
 	Stock            stock
 	StockDailyMarket stockDailyMarket
 	StockDate        stockDate
+	StockFundsRank   stockFundsRank
+	StockTigerLeader stockTigerLeader
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -54,6 +62,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Stock:            q.Stock.clone(db),
 		StockDailyMarket: q.StockDailyMarket.clone(db),
 		StockDate:        q.StockDate.clone(db),
+		StockFundsRank:   q.StockFundsRank.clone(db),
+		StockTigerLeader: q.StockTigerLeader.clone(db),
 	}
 }
 
@@ -71,6 +81,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Stock:            q.Stock.replaceDB(db),
 		StockDailyMarket: q.StockDailyMarket.replaceDB(db),
 		StockDate:        q.StockDate.replaceDB(db),
+		StockFundsRank:   q.StockFundsRank.replaceDB(db),
+		StockTigerLeader: q.StockTigerLeader.replaceDB(db),
 	}
 }
 
@@ -78,6 +90,8 @@ type queryCtx struct {
 	Stock            IStockDo
 	StockDailyMarket IStockDailyMarketDo
 	StockDate        IStockDateDo
+	StockFundsRank   IStockFundsRankDo
+	StockTigerLeader IStockTigerLeaderDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -85,6 +99,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Stock:            q.Stock.WithContext(ctx),
 		StockDailyMarket: q.StockDailyMarket.WithContext(ctx),
 		StockDate:        q.StockDate.WithContext(ctx),
+		StockFundsRank:   q.StockFundsRank.WithContext(ctx),
+		StockTigerLeader: q.StockTigerLeader.WithContext(ctx),
 	}
 }
 
