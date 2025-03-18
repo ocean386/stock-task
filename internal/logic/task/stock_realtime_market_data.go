@@ -31,7 +31,7 @@ func StockRealTimeMarketDataBatchUpdate(nType int) {
 	for bStatus == true {
 		idx = idx + 1
 		bStatus = StockRealTimeMarketDataUpdate(idx, nType, tradeDate.StockDate)
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Millisecond * 100)
 	}
 
 	logx.Infof("[实时行情数据-A股] 操作[更新] 状态[完成].")
@@ -105,7 +105,7 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 		stockCode, _ := itemMap["f12"].(string) //股票代码
 		stockName, _ := itemMap["f14"].(string) //股票名称
 
-		// 检查 Stock 表中是否存在该股票代码
+		//检查Stock表中是否存在该股票代码
 		rData, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).First()
 		if err != nil || rData == nil {
 			logx.Errorf("[实时行情数据-A股] [数据库]表[Stock] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)

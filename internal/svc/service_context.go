@@ -8,6 +8,7 @@ import (
 	"github.com/ocean386/common/snowflake"
 	"github.com/ocean386/common/zorm"
 	stockCfg "github.com/ocean386/stock-task/internal/config"
+	"github.com/ocean386/stock-task/internal/orm/model"
 	//"github.com/ocean386/common/orm/dao"
 	"github.com/ocean386/stock-task/internal/orm/dao"
 	zeroRedis "github.com/zeromicro/go-zero/core/stores/redis"
@@ -58,7 +59,9 @@ func NewServiceContext(cfg stockCfg.Config) *ServiceContext {
 			InvalidateWhenUpdate: true,           // create/update/delete 操作, 缓存失效
 			CacheTTL:             1000 * 60 * 20, // 缓存时间-20分钟
 			CacheMaxItemCnt:      50,             // 设置Sql语句一次查询,记录最大数量,超过该数值 则缓存失效
-			Tables:               []string{},
+			Tables: []string{
+				(&model.Stock{}).TableName(),
+			},
 		})
 		if err != nil {
 			panic(err)

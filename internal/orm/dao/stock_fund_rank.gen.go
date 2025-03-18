@@ -57,7 +57,7 @@ type stockFundRank struct {
 	ALL               field.Asterisk
 	StockCode         field.String  // 股票代码
 	StockName         field.String  // 股票名称
-	PlateType         field.Int64   // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
+	PlateType         field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
 	MainFund          field.Float64 // 主力净流入(亿)
 	MainPercent       field.Float64 // 主力净流入占比
 	SuperFund         field.Float64 // 超大单净流入(亿)

@@ -15,12 +15,12 @@ import (
 	"time"
 )
 
-// 更新龙虎榜列表-批量
+// 更新龙虎榜列表-批量(交易日下午5点之后)
 func StockTigerLeaderBatchUpdate(SnowFlakeWorker *snowflake.SnowFlakeIdWorker) {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()
 	if err != nil {
-		logx.Errorf("[更新个股资金流排名] [数据库]表[StockDate] 操作[查询]-error:%s", err.Error())
+		logx.Errorf("[更新龙虎榜] [数据库]表[StockDate] 操作[查询]-error:%s", err.Error())
 		return
 	}
 
@@ -32,7 +32,7 @@ func StockTigerLeaderBatchUpdate(SnowFlakeWorker *snowflake.SnowFlakeIdWorker) {
 	}
 
 	StockTigerLeaderRebuild(tradeDate.StockDate)
-	logx.Infof("[更新个股资金流排名] 操作[更新] 状态[完成].")
+	logx.Infof("[更新龙虎榜] 操作[更新] 状态[完成].")
 }
 
 func StockTigerLeaderRebuild(tradeDate time.Time) {

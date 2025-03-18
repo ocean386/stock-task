@@ -30,7 +30,7 @@ func StockFundRankBatchUpdate() {
 	for bStatus == true {
 		bStatus = StockFundRankUpdate(pageIdx, tradeDate.StockDate) //净额
 		pageIdx = pageIdx + 1
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Millisecond * 200)
 	}
 
 	StockMainPercentSort(tradeDate.StockDate) //净占比

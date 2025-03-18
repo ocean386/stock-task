@@ -21,6 +21,8 @@ var (
 	StockDailyMarket *stockDailyMarket
 	StockDate        *stockDate
 	StockFundRank    *stockFundRank
+	StockHotRank     *stockHotRank
+	StockOrderChange *stockOrderChange
 	StockTigerLeader *stockTigerLeader
 )
 
@@ -30,6 +32,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	StockDailyMarket = &Q.StockDailyMarket
 	StockDate = &Q.StockDate
 	StockFundRank = &Q.StockFundRank
+	StockHotRank = &Q.StockHotRank
+	StockOrderChange = &Q.StockOrderChange
 	StockTigerLeader = &Q.StockTigerLeader
 }
 
@@ -40,6 +44,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		StockDailyMarket: newStockDailyMarket(db, opts...),
 		StockDate:        newStockDate(db, opts...),
 		StockFundRank:    newStockFundRank(db, opts...),
+		StockHotRank:     newStockHotRank(db, opts...),
+		StockOrderChange: newStockOrderChange(db, opts...),
 		StockTigerLeader: newStockTigerLeader(db, opts...),
 	}
 }
@@ -51,6 +57,8 @@ type Query struct {
 	StockDailyMarket stockDailyMarket
 	StockDate        stockDate
 	StockFundRank    stockFundRank
+	StockHotRank     stockHotRank
+	StockOrderChange stockOrderChange
 	StockTigerLeader stockTigerLeader
 }
 
@@ -63,6 +71,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		StockDailyMarket: q.StockDailyMarket.clone(db),
 		StockDate:        q.StockDate.clone(db),
 		StockFundRank:    q.StockFundRank.clone(db),
+		StockHotRank:     q.StockHotRank.clone(db),
+		StockOrderChange: q.StockOrderChange.clone(db),
 		StockTigerLeader: q.StockTigerLeader.clone(db),
 	}
 }
@@ -82,6 +92,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		StockDailyMarket: q.StockDailyMarket.replaceDB(db),
 		StockDate:        q.StockDate.replaceDB(db),
 		StockFundRank:    q.StockFundRank.replaceDB(db),
+		StockHotRank:     q.StockHotRank.replaceDB(db),
+		StockOrderChange: q.StockOrderChange.replaceDB(db),
 		StockTigerLeader: q.StockTigerLeader.replaceDB(db),
 	}
 }
@@ -91,6 +103,8 @@ type queryCtx struct {
 	StockDailyMarket IStockDailyMarketDo
 	StockDate        IStockDateDo
 	StockFundRank    IStockFundRankDo
+	StockHotRank     IStockHotRankDo
+	StockOrderChange IStockOrderChangeDo
 	StockTigerLeader IStockTigerLeaderDo
 }
 
@@ -100,6 +114,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		StockDailyMarket: q.StockDailyMarket.WithContext(ctx),
 		StockDate:        q.StockDate.WithContext(ctx),
 		StockFundRank:    q.StockFundRank.WithContext(ctx),
+		StockHotRank:     q.StockHotRank.WithContext(ctx),
+		StockOrderChange: q.StockOrderChange.WithContext(ctx),
 		StockTigerLeader: q.StockTigerLeader.WithContext(ctx),
 	}
 }

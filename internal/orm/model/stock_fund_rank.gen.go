@@ -12,23 +12,23 @@ const TableNameStockFundRank = "stock_fund_rank"
 
 // StockFundRank 个股资金排行榜
 type StockFundRank struct {
-	StockCode         string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                       // 股票代码
-	StockName         string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                         // 股票名称
-	PlateType         int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-小盘,2-中盘,3-大盘)" json:"plate_type"`     // 盘股类型(0-全部,1-小盘,2-中盘,3-大盘)
-	MainFund          float64   `gorm:"column:main_fund;type:decimal(10,2);not null;default:0.00;comment:主力净流入(亿)" json:"main_fund"`        // 主力净流入(亿)
-	MainPercent       float64   `gorm:"column:main_percent;type:decimal(8,2);not null;default:0.00;comment:主力净流入占比" json:"main_percent"`    // 主力净流入占比
-	SuperFund         float64   `gorm:"column:super_fund;type:decimal(10,2);not null;default:0.00;comment:超大单净流入(亿)" json:"super_fund"`     // 超大单净流入(亿)
-	SuperPercent      float64   `gorm:"column:super_percent;type:decimal(8,2);not null;default:0.00;comment:超大单净流入占比" json:"super_percent"` // 超大单净流入占比
-	FundSortID        int64     `gorm:"column:fund_sort_id;type:int(11);not null;comment:净流入排名" json:"fund_sort_id"`                        // 净流入排名
-	FundPercentSortID int64     `gorm:"column:fund_percent_sort_id;type:int(11);not null;comment:净占比排名" json:"fund_percent_sort_id"`        // 净占比排名
-	VolumeRatio       float64   `gorm:"column:volume_ratio;type:decimal(8,2);not null;default:0.00;comment:量比" json:"volume_ratio"`         // 量比
-	TurnoverRate      float64   `gorm:"column:turnover_rate;type:decimal(8,2);not null;default:0.00;comment:换手" json:"turnover_rate"`       // 换手
-	IncreaseRate      float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`       // 涨幅
-	CurrentPrice      float64   `gorm:"column:current_price;type:decimal(8,2);not null;default:0.00;comment:现价" json:"current_price"`       // 现价
-	TradingDate       time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                          // 交易日期
-	Industry          string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                               // 行业
-	IndustryCode      string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                   // 行业代码
-	UpdatedAt         time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                               // 更新时间
+	StockCode         string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                         // 股票代码
+	StockName         string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                           // 股票名称
+	PlateType         int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"` // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	MainFund          float64   `gorm:"column:main_fund;type:decimal(10,2);not null;default:0.00;comment:主力净流入(亿)" json:"main_fund"`          // 主力净流入(亿)
+	MainPercent       float64   `gorm:"column:main_percent;type:decimal(8,2);not null;default:0.00;comment:主力净流入占比" json:"main_percent"`      // 主力净流入占比
+	SuperFund         float64   `gorm:"column:super_fund;type:decimal(10,2);not null;default:0.00;comment:超大单净流入(亿)" json:"super_fund"`       // 超大单净流入(亿)
+	SuperPercent      float64   `gorm:"column:super_percent;type:decimal(8,2);not null;default:0.00;comment:超大单净流入占比" json:"super_percent"`   // 超大单净流入占比
+	FundSortID        int64     `gorm:"column:fund_sort_id;type:int(11);not null;comment:净流入排名" json:"fund_sort_id"`                          // 净流入排名
+	FundPercentSortID int64     `gorm:"column:fund_percent_sort_id;type:int(11);not null;comment:净占比排名" json:"fund_percent_sort_id"`          // 净占比排名
+	VolumeRatio       float64   `gorm:"column:volume_ratio;type:decimal(8,2);not null;default:0.00;comment:量比" json:"volume_ratio"`           // 量比
+	TurnoverRate      float64   `gorm:"column:turnover_rate;type:decimal(8,2);not null;default:0.00;comment:换手" json:"turnover_rate"`         // 换手
+	IncreaseRate      float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`         // 涨幅
+	CurrentPrice      float64   `gorm:"column:current_price;type:decimal(8,2);not null;default:0.00;comment:现价" json:"current_price"`         // 现价
+	TradingDate       time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                            // 交易日期
+	Industry          string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                 // 行业
+	IndustryCode      string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                     // 行业代码
+	UpdatedAt         time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                 // 更新时间
 }
 
 // TableName StockFundRank's table name

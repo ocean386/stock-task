@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"fmt"
 	"github.com/ocean386/stock-task/internal/logic/task"
 	"time"
 
@@ -31,9 +32,10 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	resp = &types.BaseMsgResp{}
 
 	//go task.StockDailyMarketBatchUpdate()
-	//go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
+	//go task.StockRealTimeMarketDataBatchUpdate(0) // 0-流通市值 1-实时行情数据
 	//go task.StockFundRankBatchUpdate()
-	go task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker)
+	//go task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker)
+	go task.OrderChangeBatchUpdate(l.svcCtx)
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
@@ -55,6 +57,6 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	}
 
 	resp.Code = 200
-	resp.Msg = "Success"
+	resp.Msg = fmt.Sprintf("Success %v", time.Now().Format("15:04:05"))
 	return
 }
