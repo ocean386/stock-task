@@ -12,18 +12,19 @@ const TableNameStockHotRank = "stock_hot_rank"
 
 // StockHotRank 人气榜-100名
 type StockHotRank struct {
-	StockCode    string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                         // 股票代码
-	StockName    string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                           // 股票名称
-	PlateType    int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"` // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
-	HotSortID    int64     `gorm:"column:hot_sort_id;type:tinyint(4);not null;comment:排名ID" json:"hot_sort_id"`                          // 排名ID
-	VolumeRatio  float64   `gorm:"column:volume_ratio;type:decimal(5,2);not null;default:0.00;comment:量比" json:"volume_ratio"`           // 量比
-	TurnoverRate float64   `gorm:"column:turnover_rate;type:decimal(5,2);not null;default:0.00;comment:换手" json:"turnover_rate"`         // 换手
-	IncreaseRate float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`         // 涨幅
-	CurrentPrice float64   `gorm:"column:current_price;type:decimal(8,2);not null;default:0.00;comment:现价" json:"current_price"`         // 现价
-	TradingDate  time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                            // 交易日期
-	Industry     string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                 // 行业
-	IndustryCode string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                     // 行业代码
-	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                 // 更新时间
+	StockCode       string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                         // 股票代码
+	StockName       string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                           // 股票名称
+	PlateType       int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"` // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	HotSortID       int64     `gorm:"column:hot_sort_id;type:tinyint(4);not null;comment:排名ID" json:"hot_sort_id"`                          // 排名ID
+	YesterdaySortID int64     `gorm:"column:yesterday_sort_id;type:int(11);not null;comment:昨日排名ID" json:"yesterday_sort_id"`               // 昨日排名ID
+	VolumeRatio     float64   `gorm:"column:volume_ratio;type:decimal(5,2);not null;default:0.00;comment:量比" json:"volume_ratio"`           // 量比
+	TurnoverRate    float64   `gorm:"column:turnover_rate;type:decimal(5,2);not null;default:0.00;comment:换手" json:"turnover_rate"`         // 换手
+	IncreaseRate    float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`         // 涨幅
+	CurrentPrice    float64   `gorm:"column:current_price;type:decimal(8,2);not null;default:0.00;comment:现价" json:"current_price"`         // 现价
+	TradingDate     time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                            // 交易日期
+	Industry        string    `gorm:"column:industry;type:varchar(50);not null;comment:行业" json:"industry"`                                 // 行业
+	IndustryCode    string    `gorm:"column:industry_code;type:varchar(10);not null;comment:行业代码" json:"industry_code"`                     // 行业代码
+	UpdatedAt       time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                 // 更新时间
 }
 
 // TableName StockHotRank's table name

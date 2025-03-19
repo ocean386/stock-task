@@ -31,6 +31,7 @@ func newStockHotRank(db *gorm.DB, opts ...gen.DOOption) stockHotRank {
 	_stockHotRank.StockName = field.NewString(tableName, "stock_name")
 	_stockHotRank.PlateType = field.NewInt64(tableName, "plate_type")
 	_stockHotRank.HotSortID = field.NewInt64(tableName, "hot_sort_id")
+	_stockHotRank.YesterdaySortID = field.NewInt64(tableName, "yesterday_sort_id")
 	_stockHotRank.VolumeRatio = field.NewFloat64(tableName, "volume_ratio")
 	_stockHotRank.TurnoverRate = field.NewFloat64(tableName, "turnover_rate")
 	_stockHotRank.IncreaseRate = field.NewFloat64(tableName, "increase_rate")
@@ -49,19 +50,20 @@ func newStockHotRank(db *gorm.DB, opts ...gen.DOOption) stockHotRank {
 type stockHotRank struct {
 	stockHotRankDo
 
-	ALL          field.Asterisk
-	StockCode    field.String  // 股票代码
-	StockName    field.String  // 股票名称
-	PlateType    field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
-	HotSortID    field.Int64   // 排名ID
-	VolumeRatio  field.Float64 // 量比
-	TurnoverRate field.Float64 // 换手
-	IncreaseRate field.Float64 // 涨幅
-	CurrentPrice field.Float64 // 现价
-	TradingDate  field.Time    // 交易日期
-	Industry     field.String  // 行业
-	IndustryCode field.String  // 行业代码
-	UpdatedAt    field.Time    // 更新时间
+	ALL             field.Asterisk
+	StockCode       field.String  // 股票代码
+	StockName       field.String  // 股票名称
+	PlateType       field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	HotSortID       field.Int64   // 排名ID
+	YesterdaySortID field.Int64   // 昨日排名ID
+	VolumeRatio     field.Float64 // 量比
+	TurnoverRate    field.Float64 // 换手
+	IncreaseRate    field.Float64 // 涨幅
+	CurrentPrice    field.Float64 // 现价
+	TradingDate     field.Time    // 交易日期
+	Industry        field.String  // 行业
+	IndustryCode    field.String  // 行业代码
+	UpdatedAt       field.Time    // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -82,6 +84,7 @@ func (s *stockHotRank) updateTableName(table string) *stockHotRank {
 	s.StockName = field.NewString(table, "stock_name")
 	s.PlateType = field.NewInt64(table, "plate_type")
 	s.HotSortID = field.NewInt64(table, "hot_sort_id")
+	s.YesterdaySortID = field.NewInt64(table, "yesterday_sort_id")
 	s.VolumeRatio = field.NewFloat64(table, "volume_ratio")
 	s.TurnoverRate = field.NewFloat64(table, "turnover_rate")
 	s.IncreaseRate = field.NewFloat64(table, "increase_rate")
@@ -106,11 +109,12 @@ func (s *stockHotRank) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (s *stockHotRank) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 12)
+	s.fieldMap = make(map[string]field.Expr, 13)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["plate_type"] = s.PlateType
 	s.fieldMap["hot_sort_id"] = s.HotSortID
+	s.fieldMap["yesterday_sort_id"] = s.YesterdaySortID
 	s.fieldMap["volume_ratio"] = s.VolumeRatio
 	s.fieldMap["turnover_rate"] = s.TurnoverRate
 	s.fieldMap["increase_rate"] = s.IncreaseRate
