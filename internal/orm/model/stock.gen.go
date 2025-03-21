@@ -24,9 +24,10 @@ type Stock struct {
 	IncreaseRange          float64   `gorm:"column:increase_range;type:decimal(5,2);not null;default:0.00;comment:涨幅范围" json:"increase_range"`                        // 涨幅范围
 	IsNewlyListed          int64     `gorm:"column:is_newly_listed;type:tinyint(4);not null;comment:次新股(0-否 1-是) 上市时间一年以内" json:"is_newly_listed"`                    // 次新股(0-否 1-是) 上市时间一年以内
 	IsStStock              int64     `gorm:"column:is_st_stock;type:tinyint(4);not null;comment:ST股票(0-否 1-是)若ST则后期清理数据" json:"is_st_stock"`                          // ST股票(0-否 1-是)若ST则后期清理数据
-	ListingDate            time.Time `gorm:"column:listing_date;type:date;not null;default:2000-01-01" json:"listing_date"`
-	CreatedAt              time.Time `gorm:"column:created_at;comment:创建时间" json:"created_at"`                     // 创建时间
-	UpdatedAt              time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"` // 更新时间
+	IsWatchStock           int64     `gorm:"column:is_watch_stock;type:tinyint(4);not null;comment:自选股标志(0-否 1-是)" json:"is_watch_stock"`                             // 自选股标志(0-否 1-是)
+	ListingDate            time.Time `gorm:"column:listing_date;type:date;not null;default:2000-01-01;comment:上市日期" json:"listing_date"`                              // 上市日期
+	CreatedAt              time.Time `gorm:"column:created_at;comment:创建时间" json:"created_at"`                                                                        // 创建时间
+	UpdatedAt              time.Time `gorm:"column:updated_at;autoUpdateTime:mill;comment:更新时间" json:"updated_at"`                                                    // 更新时间
 }
 
 // TableName Stock's table name

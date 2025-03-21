@@ -39,6 +39,7 @@ func newStock(db *gorm.DB, opts ...gen.DOOption) stock {
 	_stock.IncreaseRange = field.NewFloat64(tableName, "increase_range")
 	_stock.IsNewlyListed = field.NewInt64(tableName, "is_newly_listed")
 	_stock.IsStStock = field.NewInt64(tableName, "is_st_stock")
+	_stock.IsWatchStock = field.NewInt64(tableName, "is_watch_stock")
 	_stock.ListingDate = field.NewTime(tableName, "listing_date")
 	_stock.CreatedAt = field.NewTime(tableName, "created_at")
 	_stock.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -65,9 +66,10 @@ type stock struct {
 	IncreaseRange          field.Float64 // 涨幅范围
 	IsNewlyListed          field.Int64   // 次新股(0-否 1-是) 上市时间一年以内
 	IsStStock              field.Int64   // ST股票(0-否 1-是)若ST则后期清理数据
-	ListingDate            field.Time
-	CreatedAt              field.Time // 创建时间
-	UpdatedAt              field.Time // 更新时间
+	IsWatchStock           field.Int64   // 自选股标志(0-否 1-是)
+	ListingDate            field.Time    // 上市日期
+	CreatedAt              field.Time    // 创建时间
+	UpdatedAt              field.Time    // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -96,6 +98,7 @@ func (s *stock) updateTableName(table string) *stock {
 	s.IncreaseRange = field.NewFloat64(table, "increase_range")
 	s.IsNewlyListed = field.NewInt64(table, "is_newly_listed")
 	s.IsStStock = field.NewInt64(table, "is_st_stock")
+	s.IsWatchStock = field.NewInt64(table, "is_watch_stock")
 	s.ListingDate = field.NewTime(table, "listing_date")
 	s.CreatedAt = field.NewTime(table, "created_at")
 	s.UpdatedAt = field.NewTime(table, "updated_at")
@@ -115,7 +118,7 @@ func (s *stock) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *stock) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 15)
+	s.fieldMap = make(map[string]field.Expr, 16)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["total_market_value"] = s.TotalMarketValue
@@ -128,6 +131,7 @@ func (s *stock) fillFieldMap() {
 	s.fieldMap["increase_range"] = s.IncreaseRange
 	s.fieldMap["is_newly_listed"] = s.IsNewlyListed
 	s.fieldMap["is_st_stock"] = s.IsStStock
+	s.fieldMap["is_watch_stock"] = s.IsWatchStock
 	s.fieldMap["listing_date"] = s.ListingDate
 	s.fieldMap["created_at"] = s.CreatedAt
 	s.fieldMap["updated_at"] = s.UpdatedAt
