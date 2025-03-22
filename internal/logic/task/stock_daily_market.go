@@ -88,7 +88,7 @@ func StockDailyMarketBatchUpdate() {
 			}
 
 			StockDailyMarketUpdate(strBeginDate, strSecID, strCode, klineType)
-			time.Sleep(time.Millisecond * 200)
+			time.Sleep(time.Millisecond * 100)
 		}
 
 		klineType = klineType + 1

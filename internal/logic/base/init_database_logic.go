@@ -32,12 +32,13 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	resp = &types.BaseMsgResp{}
 
 	//go task.StockDailyMarketBatchUpdate()
-	go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
-	go task.StockFundRankBatchUpdate()
-	go task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker)
-	go task.OrderChangeBatchUpdate(l.svcCtx)
-	go task.StockHotRankUpdate()
+	//go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
+	//go task.StockFundRankBatchUpdate()
+	//go task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker)
+	//go task.OrderChangeBatchUpdate(l.svcCtx)
+	//go task.StockHotRankUpdate()
 	//go task.StockDailyCommentBatchUpdate()
+	go task.StockStrongPoolBatchUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {

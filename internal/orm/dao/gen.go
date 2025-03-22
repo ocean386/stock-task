@@ -24,6 +24,7 @@ var (
 	StockFundRank     *stockFundRank
 	StockHotRank      *stockHotRank
 	StockOrderChange  *stockOrderChange
+	StockStrong       *stockStrong
 	StockTigerLeader  *stockTigerLeader
 )
 
@@ -36,6 +37,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	StockFundRank = &Q.StockFundRank
 	StockHotRank = &Q.StockHotRank
 	StockOrderChange = &Q.StockOrderChange
+	StockStrong = &Q.StockStrong
 	StockTigerLeader = &Q.StockTigerLeader
 }
 
@@ -49,6 +51,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		StockFundRank:     newStockFundRank(db, opts...),
 		StockHotRank:      newStockHotRank(db, opts...),
 		StockOrderChange:  newStockOrderChange(db, opts...),
+		StockStrong:       newStockStrong(db, opts...),
 		StockTigerLeader:  newStockTigerLeader(db, opts...),
 	}
 }
@@ -63,6 +66,7 @@ type Query struct {
 	StockFundRank     stockFundRank
 	StockHotRank      stockHotRank
 	StockOrderChange  stockOrderChange
+	StockStrong       stockStrong
 	StockTigerLeader  stockTigerLeader
 }
 
@@ -78,6 +82,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		StockFundRank:     q.StockFundRank.clone(db),
 		StockHotRank:      q.StockHotRank.clone(db),
 		StockOrderChange:  q.StockOrderChange.clone(db),
+		StockStrong:       q.StockStrong.clone(db),
 		StockTigerLeader:  q.StockTigerLeader.clone(db),
 	}
 }
@@ -100,6 +105,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		StockFundRank:     q.StockFundRank.replaceDB(db),
 		StockHotRank:      q.StockHotRank.replaceDB(db),
 		StockOrderChange:  q.StockOrderChange.replaceDB(db),
+		StockStrong:       q.StockStrong.replaceDB(db),
 		StockTigerLeader:  q.StockTigerLeader.replaceDB(db),
 	}
 }
@@ -112,6 +118,7 @@ type queryCtx struct {
 	StockFundRank     IStockFundRankDo
 	StockHotRank      IStockHotRankDo
 	StockOrderChange  IStockOrderChangeDo
+	StockStrong       IStockStrongDo
 	StockTigerLeader  IStockTigerLeaderDo
 }
 
@@ -124,6 +131,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		StockFundRank:     q.StockFundRank.WithContext(ctx),
 		StockHotRank:      q.StockHotRank.WithContext(ctx),
 		StockOrderChange:  q.StockOrderChange.WithContext(ctx),
+		StockStrong:       q.StockStrong.WithContext(ctx),
 		StockTigerLeader:  q.StockTigerLeader.WithContext(ctx),
 	}
 }
