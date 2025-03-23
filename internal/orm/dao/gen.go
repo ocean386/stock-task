@@ -16,26 +16,36 @@ import (
 )
 
 var (
-	Q                 = new(Query)
-	Stock             *stock
-	StockDailyComment *stockDailyComment
-	StockDailyMarket  *stockDailyMarket
-	StockDate         *stockDate
-	StockFundRank     *stockFundRank
-	StockHotRank      *stockHotRank
-	StockOrderChange  *stockOrderChange
-	StockStrong       *stockStrong
-	StockTigerLeader  *stockTigerLeader
+	Q                  = new(Query)
+	Stock              *stock
+	StockConcept       *stockConcept
+	StockConceptList   *stockConceptList
+	StockDailyComment  *stockDailyComment
+	StockDailyConcept  *stockDailyConcept
+	StockDailyIndustry *stockDailyIndustry
+	StockDailyMarket   *stockDailyMarket
+	StockDate          *stockDate
+	StockFundRank      *stockFundRank
+	StockHotRank       *stockHotRank
+	StockIndustry      *stockIndustry
+	StockOrderChange   *stockOrderChange
+	StockStrong        *stockStrong
+	StockTigerLeader   *stockTigerLeader
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Stock = &Q.Stock
+	StockConcept = &Q.StockConcept
+	StockConceptList = &Q.StockConceptList
 	StockDailyComment = &Q.StockDailyComment
+	StockDailyConcept = &Q.StockDailyConcept
+	StockDailyIndustry = &Q.StockDailyIndustry
 	StockDailyMarket = &Q.StockDailyMarket
 	StockDate = &Q.StockDate
 	StockFundRank = &Q.StockFundRank
 	StockHotRank = &Q.StockHotRank
+	StockIndustry = &Q.StockIndustry
 	StockOrderChange = &Q.StockOrderChange
 	StockStrong = &Q.StockStrong
 	StockTigerLeader = &Q.StockTigerLeader
@@ -43,47 +53,62 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:                db,
-		Stock:             newStock(db, opts...),
-		StockDailyComment: newStockDailyComment(db, opts...),
-		StockDailyMarket:  newStockDailyMarket(db, opts...),
-		StockDate:         newStockDate(db, opts...),
-		StockFundRank:     newStockFundRank(db, opts...),
-		StockHotRank:      newStockHotRank(db, opts...),
-		StockOrderChange:  newStockOrderChange(db, opts...),
-		StockStrong:       newStockStrong(db, opts...),
-		StockTigerLeader:  newStockTigerLeader(db, opts...),
+		db:                 db,
+		Stock:              newStock(db, opts...),
+		StockConcept:       newStockConcept(db, opts...),
+		StockConceptList:   newStockConceptList(db, opts...),
+		StockDailyComment:  newStockDailyComment(db, opts...),
+		StockDailyConcept:  newStockDailyConcept(db, opts...),
+		StockDailyIndustry: newStockDailyIndustry(db, opts...),
+		StockDailyMarket:   newStockDailyMarket(db, opts...),
+		StockDate:          newStockDate(db, opts...),
+		StockFundRank:      newStockFundRank(db, opts...),
+		StockHotRank:       newStockHotRank(db, opts...),
+		StockIndustry:      newStockIndustry(db, opts...),
+		StockOrderChange:   newStockOrderChange(db, opts...),
+		StockStrong:        newStockStrong(db, opts...),
+		StockTigerLeader:   newStockTigerLeader(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Stock             stock
-	StockDailyComment stockDailyComment
-	StockDailyMarket  stockDailyMarket
-	StockDate         stockDate
-	StockFundRank     stockFundRank
-	StockHotRank      stockHotRank
-	StockOrderChange  stockOrderChange
-	StockStrong       stockStrong
-	StockTigerLeader  stockTigerLeader
+	Stock              stock
+	StockConcept       stockConcept
+	StockConceptList   stockConceptList
+	StockDailyComment  stockDailyComment
+	StockDailyConcept  stockDailyConcept
+	StockDailyIndustry stockDailyIndustry
+	StockDailyMarket   stockDailyMarket
+	StockDate          stockDate
+	StockFundRank      stockFundRank
+	StockHotRank       stockHotRank
+	StockIndustry      stockIndustry
+	StockOrderChange   stockOrderChange
+	StockStrong        stockStrong
+	StockTigerLeader   stockTigerLeader
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                db,
-		Stock:             q.Stock.clone(db),
-		StockDailyComment: q.StockDailyComment.clone(db),
-		StockDailyMarket:  q.StockDailyMarket.clone(db),
-		StockDate:         q.StockDate.clone(db),
-		StockFundRank:     q.StockFundRank.clone(db),
-		StockHotRank:      q.StockHotRank.clone(db),
-		StockOrderChange:  q.StockOrderChange.clone(db),
-		StockStrong:       q.StockStrong.clone(db),
-		StockTigerLeader:  q.StockTigerLeader.clone(db),
+		db:                 db,
+		Stock:              q.Stock.clone(db),
+		StockConcept:       q.StockConcept.clone(db),
+		StockConceptList:   q.StockConceptList.clone(db),
+		StockDailyComment:  q.StockDailyComment.clone(db),
+		StockDailyConcept:  q.StockDailyConcept.clone(db),
+		StockDailyIndustry: q.StockDailyIndustry.clone(db),
+		StockDailyMarket:   q.StockDailyMarket.clone(db),
+		StockDate:          q.StockDate.clone(db),
+		StockFundRank:      q.StockFundRank.clone(db),
+		StockHotRank:       q.StockHotRank.clone(db),
+		StockIndustry:      q.StockIndustry.clone(db),
+		StockOrderChange:   q.StockOrderChange.clone(db),
+		StockStrong:        q.StockStrong.clone(db),
+		StockTigerLeader:   q.StockTigerLeader.clone(db),
 	}
 }
 
@@ -97,42 +122,57 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:                db,
-		Stock:             q.Stock.replaceDB(db),
-		StockDailyComment: q.StockDailyComment.replaceDB(db),
-		StockDailyMarket:  q.StockDailyMarket.replaceDB(db),
-		StockDate:         q.StockDate.replaceDB(db),
-		StockFundRank:     q.StockFundRank.replaceDB(db),
-		StockHotRank:      q.StockHotRank.replaceDB(db),
-		StockOrderChange:  q.StockOrderChange.replaceDB(db),
-		StockStrong:       q.StockStrong.replaceDB(db),
-		StockTigerLeader:  q.StockTigerLeader.replaceDB(db),
+		db:                 db,
+		Stock:              q.Stock.replaceDB(db),
+		StockConcept:       q.StockConcept.replaceDB(db),
+		StockConceptList:   q.StockConceptList.replaceDB(db),
+		StockDailyComment:  q.StockDailyComment.replaceDB(db),
+		StockDailyConcept:  q.StockDailyConcept.replaceDB(db),
+		StockDailyIndustry: q.StockDailyIndustry.replaceDB(db),
+		StockDailyMarket:   q.StockDailyMarket.replaceDB(db),
+		StockDate:          q.StockDate.replaceDB(db),
+		StockFundRank:      q.StockFundRank.replaceDB(db),
+		StockHotRank:       q.StockHotRank.replaceDB(db),
+		StockIndustry:      q.StockIndustry.replaceDB(db),
+		StockOrderChange:   q.StockOrderChange.replaceDB(db),
+		StockStrong:        q.StockStrong.replaceDB(db),
+		StockTigerLeader:   q.StockTigerLeader.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Stock             IStockDo
-	StockDailyComment IStockDailyCommentDo
-	StockDailyMarket  IStockDailyMarketDo
-	StockDate         IStockDateDo
-	StockFundRank     IStockFundRankDo
-	StockHotRank      IStockHotRankDo
-	StockOrderChange  IStockOrderChangeDo
-	StockStrong       IStockStrongDo
-	StockTigerLeader  IStockTigerLeaderDo
+	Stock              IStockDo
+	StockConcept       IStockConceptDo
+	StockConceptList   IStockConceptListDo
+	StockDailyComment  IStockDailyCommentDo
+	StockDailyConcept  IStockDailyConceptDo
+	StockDailyIndustry IStockDailyIndustryDo
+	StockDailyMarket   IStockDailyMarketDo
+	StockDate          IStockDateDo
+	StockFundRank      IStockFundRankDo
+	StockHotRank       IStockHotRankDo
+	StockIndustry      IStockIndustryDo
+	StockOrderChange   IStockOrderChangeDo
+	StockStrong        IStockStrongDo
+	StockTigerLeader   IStockTigerLeaderDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Stock:             q.Stock.WithContext(ctx),
-		StockDailyComment: q.StockDailyComment.WithContext(ctx),
-		StockDailyMarket:  q.StockDailyMarket.WithContext(ctx),
-		StockDate:         q.StockDate.WithContext(ctx),
-		StockFundRank:     q.StockFundRank.WithContext(ctx),
-		StockHotRank:      q.StockHotRank.WithContext(ctx),
-		StockOrderChange:  q.StockOrderChange.WithContext(ctx),
-		StockStrong:       q.StockStrong.WithContext(ctx),
-		StockTigerLeader:  q.StockTigerLeader.WithContext(ctx),
+		Stock:              q.Stock.WithContext(ctx),
+		StockConcept:       q.StockConcept.WithContext(ctx),
+		StockConceptList:   q.StockConceptList.WithContext(ctx),
+		StockDailyComment:  q.StockDailyComment.WithContext(ctx),
+		StockDailyConcept:  q.StockDailyConcept.WithContext(ctx),
+		StockDailyIndustry: q.StockDailyIndustry.WithContext(ctx),
+		StockDailyMarket:   q.StockDailyMarket.WithContext(ctx),
+		StockDate:          q.StockDate.WithContext(ctx),
+		StockFundRank:      q.StockFundRank.WithContext(ctx),
+		StockHotRank:       q.StockHotRank.WithContext(ctx),
+		StockIndustry:      q.StockIndustry.WithContext(ctx),
+		StockOrderChange:   q.StockOrderChange.WithContext(ctx),
+		StockStrong:        q.StockStrong.WithContext(ctx),
+		StockTigerLeader:   q.StockTigerLeader.WithContext(ctx),
 	}
 }
 

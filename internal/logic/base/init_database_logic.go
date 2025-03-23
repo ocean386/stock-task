@@ -38,7 +38,9 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	//go task.OrderChangeBatchUpdate(l.svcCtx)
 	//go task.StockHotRankUpdate()
 	//go task.StockDailyCommentBatchUpdate()
-	go task.StockStrongPoolBatchUpdate()
+	//go task.StockStrongPoolBatchUpdate()
+	//go task.InitStockIndustryList()
+	go task.StockDailyIndustryUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
