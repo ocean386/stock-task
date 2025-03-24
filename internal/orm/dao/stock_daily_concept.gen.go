@@ -33,6 +33,7 @@ func newStockDailyConcept(db *gorm.DB, opts ...gen.DOOption) stockDailyConcept {
 	_stockDailyConcept.DownNumber = field.NewInt64(tableName, "down_number")
 	_stockDailyConcept.ConceptIncreaseRate = field.NewFloat64(tableName, "concept_increase_rate")
 	_stockDailyConcept.ConceptRank = field.NewInt64(tableName, "concept_rank")
+	_stockDailyConcept.StockCode = field.NewString(tableName, "stock_code")
 	_stockDailyConcept.StockName = field.NewString(tableName, "stock_name")
 	_stockDailyConcept.IncreaseRate = field.NewFloat64(tableName, "increase_rate")
 	_stockDailyConcept.TradingDate = field.NewTime(tableName, "trading_date")
@@ -54,6 +55,7 @@ type stockDailyConcept struct {
 	DownNumber          field.Int64   // 下跌家数
 	ConceptIncreaseRate field.Float64 // 概念涨幅
 	ConceptRank         field.Int64   // 涨幅排名
+	StockCode           field.String  // 股票代码-领涨
 	StockName           field.String  // 股票名称-领涨
 	IncreaseRate        field.Float64 // 股票涨幅
 	TradingDate         field.Time    // 交易日期
@@ -80,6 +82,7 @@ func (s *stockDailyConcept) updateTableName(table string) *stockDailyConcept {
 	s.DownNumber = field.NewInt64(table, "down_number")
 	s.ConceptIncreaseRate = field.NewFloat64(table, "concept_increase_rate")
 	s.ConceptRank = field.NewInt64(table, "concept_rank")
+	s.StockCode = field.NewString(table, "stock_code")
 	s.StockName = field.NewString(table, "stock_name")
 	s.IncreaseRate = field.NewFloat64(table, "increase_rate")
 	s.TradingDate = field.NewTime(table, "trading_date")
@@ -100,13 +103,14 @@ func (s *stockDailyConcept) GetFieldByName(fieldName string) (field.OrderExpr, b
 }
 
 func (s *stockDailyConcept) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 10)
+	s.fieldMap = make(map[string]field.Expr, 11)
 	s.fieldMap["concept_code"] = s.ConceptCode
 	s.fieldMap["concept_name"] = s.ConceptName
 	s.fieldMap["up_number"] = s.UpNumber
 	s.fieldMap["down_number"] = s.DownNumber
 	s.fieldMap["concept_increase_rate"] = s.ConceptIncreaseRate
 	s.fieldMap["concept_rank"] = s.ConceptRank
+	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["increase_rate"] = s.IncreaseRate
 	s.fieldMap["trading_date"] = s.TradingDate

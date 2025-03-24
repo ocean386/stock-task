@@ -18,6 +18,7 @@ type StockDailyIndustry struct {
 	DownNumber           int64     `gorm:"column:down_number;type:int(11);not null;comment:下跌家数" json:"down_number"`                                         // 下跌家数
 	IndustryIncreaseRate float64   `gorm:"column:industry_increase_rate;type:decimal(8,2);not null;default:0.00;comment:行业涨幅" json:"industry_increase_rate"` // 行业涨幅
 	IndustryRank         int64     `gorm:"column:industry_rank;type:int(11);not null;comment:涨幅排名" json:"industry_rank"`                                     // 涨幅排名
+	StockCode            string    `gorm:"column:stock_code;type:varchar(10);not null;comment:股票代码-领涨" json:"stock_code"`                                    // 股票代码-领涨
 	StockName            string    `gorm:"column:stock_name;type:varchar(50);not null;comment:股票名称-领涨" json:"stock_name"`                                    // 股票名称-领涨
 	IncreaseRate         float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:股票涨幅" json:"increase_rate"`                   // 股票涨幅
 	TradingDate          time.Time `gorm:"column:trading_date;type:date;primaryKey;comment:交易日期" json:"trading_date"`                                        // 交易日期
