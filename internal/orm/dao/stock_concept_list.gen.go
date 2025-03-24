@@ -27,10 +27,11 @@ func newStockConceptList(db *gorm.DB, opts ...gen.DOOption) stockConceptList {
 
 	tableName := _stockConceptList.stockConceptListDo.TableName()
 	_stockConceptList.ALL = field.NewAsterisk(tableName)
-	_stockConceptList.ConceptCode = field.NewString(tableName, "concept_code")
-	_stockConceptList.ConceptName = field.NewString(tableName, "concept_name")
+	_stockConceptList.ID = field.NewInt64(tableName, "id")
 	_stockConceptList.StockCode = field.NewString(tableName, "stock_code")
 	_stockConceptList.StockName = field.NewString(tableName, "stock_name")
+	_stockConceptList.ConceptCode = field.NewString(tableName, "concept_code")
+	_stockConceptList.ConceptName = field.NewString(tableName, "concept_name")
 	_stockConceptList.CreatedAt = field.NewTime(tableName, "created_at")
 	_stockConceptList.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -44,10 +45,11 @@ type stockConceptList struct {
 	stockConceptListDo
 
 	ALL         field.Asterisk
-	ConceptCode field.String // 概念代码
-	ConceptName field.String // 概念名称
+	ID          field.Int64  // 主键ID
 	StockCode   field.String // 股票代码
 	StockName   field.String // 股票名称
+	ConceptCode field.String // 概念代码
+	ConceptName field.String // 概念名称
 	CreatedAt   field.Time   // 创建时间
 	UpdatedAt   field.Time   // 更新时间
 
@@ -66,10 +68,11 @@ func (s stockConceptList) As(alias string) *stockConceptList {
 
 func (s *stockConceptList) updateTableName(table string) *stockConceptList {
 	s.ALL = field.NewAsterisk(table)
-	s.ConceptCode = field.NewString(table, "concept_code")
-	s.ConceptName = field.NewString(table, "concept_name")
+	s.ID = field.NewInt64(table, "id")
 	s.StockCode = field.NewString(table, "stock_code")
 	s.StockName = field.NewString(table, "stock_name")
+	s.ConceptCode = field.NewString(table, "concept_code")
+	s.ConceptName = field.NewString(table, "concept_name")
 	s.CreatedAt = field.NewTime(table, "created_at")
 	s.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -88,11 +91,12 @@ func (s *stockConceptList) GetFieldByName(fieldName string) (field.OrderExpr, bo
 }
 
 func (s *stockConceptList) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 6)
-	s.fieldMap["concept_code"] = s.ConceptCode
-	s.fieldMap["concept_name"] = s.ConceptName
+	s.fieldMap = make(map[string]field.Expr, 7)
+	s.fieldMap["id"] = s.ID
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
+	s.fieldMap["concept_code"] = s.ConceptCode
+	s.fieldMap["concept_name"] = s.ConceptName
 	s.fieldMap["created_at"] = s.CreatedAt
 	s.fieldMap["updated_at"] = s.UpdatedAt
 }

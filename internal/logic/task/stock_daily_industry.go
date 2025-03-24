@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// 更行业板块-每日领涨股票
+// 更新行业板块-每日领涨股票
 func StockDailyIndustryUpdate() {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
@@ -101,6 +101,7 @@ func StockDailyIndustryUpdate() {
 			DownNumber:           cast.ToInt64(itemMap["f105"]),
 			IndustryIncreaseRate: fIndustryIncreaseRate.DivRound(decimal.NewFromInt(100), 2).InexactFloat64(),
 			IndustryRank:         int64(i + 1),
+			StockCode:            cast.ToString(itemMap["f140"]),
 			StockName:            cast.ToString(itemMap["f128"]), //股票名称
 			IncreaseRate:         fIncreaseRate.DivRound(decimal.NewFromInt(100), 2).InexactFloat64(),
 			TradingDate:          tradeDate.StockDate,

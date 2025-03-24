@@ -40,7 +40,10 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 	//go task.StockDailyCommentBatchUpdate()
 	//go task.StockStrongPoolBatchUpdate()
 	//go task.InitStockIndustryList()
-	go task.StockDailyIndustryUpdate()
+	//go task.StockDailyIndustryUpdate()
+	//go task.InitStockConceptList()
+	//go task.StockDailyConcept()
+	go task.StockConceptBatchUpdate()
 
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
