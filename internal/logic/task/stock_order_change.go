@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// 更新盘口异动信息
+// 更新盘口异动信息(每个交易日执行一次)
 func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()

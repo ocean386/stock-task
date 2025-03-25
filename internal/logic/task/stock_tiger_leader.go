@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// 更新龙虎榜列表-批量(交易日下午5点之后)
+// 更新龙虎榜列表-批量(每个交易日下午5点之后)
 func StockTigerLeaderBatchUpdate(SnowFlakeWorker *snowflake.SnowFlakeIdWorker) {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()

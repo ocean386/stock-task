@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// 更新个股人气榜-100名
+// 更新个股人气榜-100名(每个交易日执行一次)
 func StockHotRankUpdate() {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()

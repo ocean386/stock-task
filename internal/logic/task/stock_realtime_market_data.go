@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// 更新A股实时行情数据-批量
+// 更新A股实时行情数据-批量(交易日-每5分钟 执行一次)
 func StockRealTimeMarketDataBatchUpdate(nType int) {
 
 	var (
@@ -123,11 +123,13 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 			highestPrice := decimal.NewFromFloat(cast.ToFloat64(itemMap["f15"])) //最高价
 			lowestPrice := decimal.NewFromFloat(cast.ToFloat64(itemMap["f16"]))  //最低价
 			openingPrice := decimal.NewFromFloat(cast.ToFloat64(itemMap["f17"])) //开盘价
+			turnover = turnover.DivRound(decimal.NewFromInt(100000000), 2)
+			volume = volume.DivRound(decimal.NewFromInt(10000), 1)
 
 			mData := model.StockDailyMarket{
 				StockCode:    stockCode,
 				StockName:    stockName,
-				Turnover:     turnover.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
+				Turnover:     turnover.InexactFloat64(),
 				VolumeRatio:  volumeRatio.InexactFloat64(),
 				TurnoverRate: turnoverRate.InexactFloat64(),
 				IncreaseRate: increaseRate.InexactFloat64(),
@@ -136,7 +138,7 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 				OpeningPrice: openingPrice.InexactFloat64(),
 				HighestPrice: highestPrice.InexactFloat64(),
 				LowestPrice:  lowestPrice.InexactFloat64(),
-				Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
+				Volume:       volume.InexactFloat64(),
 				KlineType:    0, //K线类型(0-日K线,1-周K线,2-月K线)
 				TradingDate:  tradeDate,
 			}

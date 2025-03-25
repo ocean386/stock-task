@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// 更新概念板块-每日领涨股票
+// 更新概念板块-每日领涨股票(每个交易日执行一次)
 func StockDailyConcept() {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()

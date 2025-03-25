@@ -31,6 +31,7 @@ func newStockConcept(db *gorm.DB, opts ...gen.DOOption) stockConcept {
 	_stockConcept.ConceptCode = field.NewString(tableName, "concept_code")
 	_stockConcept.ConceptName = field.NewString(tableName, "concept_name")
 	_stockConcept.IsWatchConcept = field.NewInt64(tableName, "is_watch_concept")
+	_stockConcept.IsDeleted = field.NewInt64(tableName, "is_deleted")
 	_stockConcept.CreatedAt = field.NewTime(tableName, "created_at")
 	_stockConcept.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -48,6 +49,7 @@ type stockConcept struct {
 	ConceptCode    field.String // 概念代码
 	ConceptName    field.String // 概念名称
 	IsWatchConcept field.Int64  // 自选概念标志(0-否 1-是)
+	IsDeleted      field.Int64  // 删除标记(0-否 1-是)
 	CreatedAt      field.Time   // 创建时间
 	UpdatedAt      field.Time   // 更新时间
 
@@ -70,6 +72,7 @@ func (s *stockConcept) updateTableName(table string) *stockConcept {
 	s.ConceptCode = field.NewString(table, "concept_code")
 	s.ConceptName = field.NewString(table, "concept_name")
 	s.IsWatchConcept = field.NewInt64(table, "is_watch_concept")
+	s.IsDeleted = field.NewInt64(table, "is_deleted")
 	s.CreatedAt = field.NewTime(table, "created_at")
 	s.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -88,11 +91,12 @@ func (s *stockConcept) GetFieldByName(fieldName string) (field.OrderExpr, bool) 
 }
 
 func (s *stockConcept) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 6)
+	s.fieldMap = make(map[string]field.Expr, 7)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["concept_code"] = s.ConceptCode
 	s.fieldMap["concept_name"] = s.ConceptName
 	s.fieldMap["is_watch_concept"] = s.IsWatchConcept
+	s.fieldMap["is_deleted"] = s.IsDeleted
 	s.fieldMap["created_at"] = s.CreatedAt
 	s.fieldMap["updated_at"] = s.UpdatedAt
 }

@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// 更新A股每日股评-批量
+// 更新A股每日股评-批量(每个交易日执行一次)
 func StockDailyCommentBatchUpdate() {
 
 	var (
@@ -132,6 +132,7 @@ func StockDailyCommentUpdate(idx int, tradeDate time.Time) (bStatus bool) {
 			Rank:           rank,
 			Focus:          focus.RoundUp(2).InexactFloat64(),
 			TradingDate:    tradeDate,
+			UpdatedAt:      time.Now(),
 		}
 		err = dao.StockDailyComment.Save(&mData)
 		if err != nil {

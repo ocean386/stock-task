@@ -25,10 +25,10 @@ func IsThisMonth(t time.Time) bool {
 	return t.Year() == now.Year() && t.Month() == now.Month()
 }
 
-// 更新A股日K线行情数据-批量
+// 更新A股日K线行情数据-批量(每个交易日执行一次,每周六执行周期级别,每月1号执行月期级别)
 func StockDailyMarketBatchUpdate() {
 
-	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(2, 3)).Find() //微盘,小盘,中盘
+	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(1, 2, 3)).Find() //微盘,小盘,中盘
 	if err != nil {
 		logx.Errorf("[历史行情数据-A股] [数据库]表[Stock] 操作[查询]-error:%s", err.Error())
 		return
@@ -121,7 +121,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	} else {
 		params.Add("beg", "20150101")
 	}
-	params.Add("end", "20250313")
+	params.Add("end", "20250325")
 	params.Add("lmt", "10000")
 	params.Add("_", fmt.Sprintf("%d", time.Now().UnixNano()/1e6))
 	fullUrl := fmt.Sprintf("%s?%s", strUrl, params.Encode())
@@ -203,19 +203,21 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 		lowPrice := cast.ToFloat64(fields[4])                       // 最低价
 		volume := decimal.NewFromInt(cast.ToInt64(fields[5]))       //成交量(万手)
 		turnover := decimal.NewFromFloat(cast.ToFloat64(fields[6])) //成交额(亿)
-
-		amplitude := cast.ToFloat64(fields[7])    //振幅
-		increaseRate := cast.ToFloat64(fields[8]) //涨幅
-		turnoverRate := cast.ToFloat64(fields[9]) //换手
+		amplitude := cast.ToFloat64(fields[7])                      //振幅
+		increaseRate := cast.ToFloat64(fields[8])                   //涨幅
+		turnoverRate := cast.ToFloat64(fields[9])                   //换手
 
 		if openPrice < 0 || closePrice < 0 || volume.LessThan(decimal.NewFromInt(1)) || tDate.Before(targetDate) {
 			continue
 		}
 
+		turnover = turnover.DivRound(decimal.NewFromInt(100000000), 2)
+		volume = volume.DivRound(decimal.NewFromInt(10000), 1)
+
 		marketData := &model.StockDailyMarket{
 			StockCode:    strStockCode,
 			StockName:    strName,
-			Turnover:     turnover.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
+			Turnover:     turnover.InexactFloat64(),
 			TurnoverRate: turnoverRate,
 			IncreaseRate: increaseRate,
 			Amplitude:    amplitude,
@@ -223,7 +225,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 			OpeningPrice: openPrice,
 			HighestPrice: highPrice,
 			LowestPrice:  lowPrice,
-			Volume:       volume.DivRound(decimal.NewFromInt(10000), 1).InexactFloat64(),
+			Volume:       volume.InexactFloat64(),
 			KlineType:    klineType,
 			TradingDate:  tDate,
 		}

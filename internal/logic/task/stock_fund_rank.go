@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// 更新个股资金流排名-批量
+// 更新个股资金流排名-批量(每个交易日执行一次)
 func StockFundRankBatchUpdate() {
 
 	var (
@@ -30,7 +30,7 @@ func StockFundRankBatchUpdate() {
 	for bStatus == true {
 		bStatus = StockFundRankUpdate(pageIdx, tradeDate.StockDate) //净额
 		pageIdx = pageIdx + 1
-		time.Sleep(time.Millisecond * 200)
+		time.Sleep(time.Millisecond * 100)
 	}
 
 	StockMainPercentSort(tradeDate.StockDate) //净占比
@@ -49,7 +49,7 @@ func StockMainPercentSort(tradeDate time.Time) {
 
 	for idx, s := range stockFunds {
 		info, err := dao.StockFundRank.Where(dao.StockFundRank.StockCode.Eq(s.StockCode)).Updates(model.StockFundRank{
-			FundPercentSortID: int64(idx + 1),
+			FundPercentSortID: int64(idx + 1), //主力净流入占比-排名
 			UpdatedAt:         time.Now(),
 		},
 		)

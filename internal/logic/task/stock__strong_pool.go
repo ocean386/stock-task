@@ -216,25 +216,28 @@ func StockStrongPoolUpdate(strType, strSort string, nType int64, tradeDate time.
 			nUpdownTimes = cast.ToInt64(zttj["ct"])
 		}
 
+		circulatingMarketValue = circulatingMarketValue.DivRound(decimal.NewFromInt(100000000), 2)
+		fund = fund.DivRound(decimal.NewFromInt(100000000), 2)
+
 		stock := model.StockStrong{
 			StockCode:                    stockCode,
 			StockName:                    rData.StockName,
-			CirculatingMarketValue:       circulatingMarketValue.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(), //流通市值
+			CirculatingMarketValue:       circulatingMarketValue.InexactFloat64(), //流通市值
 			PlateType:                    rData.PlateType,
-			TurnoverRate:                 turnoverRate.Round(2).InexactFloat64(),                           //换手率
-			IncreaseRate:                 increaseRate.Round(2).InexactFloat64(),                           //涨幅
-			CurrentPrice:                 currentPrice.InexactFloat64(),                                    //最新价格
-			NewHigh:                      nNewHigh,                                                         //是否新高(0-否 1-是)
-			UpdownType:                   nType,                                                            //涨跌类型(0-全部,1-涨停股,2-跌停股,3-炸板股,4-强势股)
-			SealingFund:                  fund.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(), //封板资金
-			FirstSealingTime:             strFirstTime,                                                     //首次封板时间
-			LastSealingTime:              strLastTime,                                                      //最后封板时间
-			BreakingBoardTimes:           nBreakingBoardTimes,                                              //炸板次数
-			UpdownDays:                   nUpdownDays,                                                      //涨停统计-天数
-			UpdownTimes:                  nUpdownTimes,                                                     //涨停统计-次数
-			ConsecutiveLimitUpDays:       nConsecutiveLimitUpDays,                                          //连板次数
-			SealingOrderTradingRatio:     dSealingOrderTradingRatio.InexactFloat64(),                       //封单成交比
-			SealingOrderCirculatingRatio: dSealingOrderCirculatingRatio.InexactFloat64(),                   //封单流通比
+			TurnoverRate:                 turnoverRate.Round(2).InexactFloat64(),         //换手率
+			IncreaseRate:                 increaseRate.Round(2).InexactFloat64(),         //涨幅
+			CurrentPrice:                 currentPrice.InexactFloat64(),                  //最新价格
+			NewHigh:                      nNewHigh,                                       //是否新高(0-否 1-是)
+			UpdownType:                   nType,                                          //涨跌类型(0-全部,1-涨停股,2-跌停股,3-炸板股,4-强势股)
+			SealingFund:                  fund.InexactFloat64(),                          //封板资金
+			FirstSealingTime:             strFirstTime,                                   //首次封板时间
+			LastSealingTime:              strLastTime,                                    //最后封板时间
+			BreakingBoardTimes:           nBreakingBoardTimes,                            //炸板次数
+			UpdownDays:                   nUpdownDays,                                    //涨停统计-天数
+			UpdownTimes:                  nUpdownTimes,                                   //涨停统计-次数
+			ConsecutiveLimitUpDays:       nConsecutiveLimitUpDays,                        //连板次数
+			SealingOrderTradingRatio:     dSealingOrderTradingRatio.InexactFloat64(),     //封单成交比
+			SealingOrderCirculatingRatio: dSealingOrderCirculatingRatio.InexactFloat64(), //封单流通比
 			TradingDate:                  tradeDate,
 			UpdatedAt:                    time.Now(),
 		}

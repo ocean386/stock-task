@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-// 概念板块-成份股票
-func StockConceptBatchUpdate() {
+// 更新概念板块-成份股票(每个星期执行一次)
+func StockConceptListBatchUpdate() {
 
 	conceptSlice, err := dao.StockConcept.Find()
 	if err != nil {
@@ -22,16 +22,20 @@ func StockConceptBatchUpdate() {
 	}
 
 	for _, conceptData := range conceptSlice {
+		if conceptData.IsDeleted == 1 {
+			continue
+		}
 		bStatus := true
 		idx := int64(0)
 		for bStatus {
 			idx = idx + 1
-			bStatus = StockConceptList(idx, conceptData.ConceptCode, conceptData.ConceptName)
+			bStatus = ConceptStockListUpdate(idx, conceptData.ConceptCode, conceptData.ConceptName)
 		}
 	}
 }
 
-func StockConceptList(idx int64, strConceptCode, strConceptName string) (bStatus bool) {
+// 更新概念板块-成份股票
+func ConceptStockListUpdate(idx int64, strConceptCode, strConceptName string) (bStatus bool) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
 	params := url.Values{}
