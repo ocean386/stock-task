@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"fmt"
+	"github.com/ocean386/stock-task/internal/logic/task"
 	"time"
 
 	"github.com/ocean386/stock-task/internal/svc"
@@ -46,7 +47,17 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 			resp.Msg = "redis error"
 			return resp, err
 		}
-		//go StockTask()
+		go func() {
+			task.StockRealTimeMarketDataBatchUpdate(1)                 // 0-流通市值 1-实时行情数据
+			task.StockFundRankBatchUpdate()                            // 每日资金流向排名
+			task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker) // 每日龙虎榜
+			task.OrderChangeBatchUpdate(l.svcCtx)                      // 每日个股异动
+			task.StockHotRankUpdate()                                  // 每日人气榜
+			task.StockDailyCommentBatchUpdate()                        // 每日股评
+			task.StockStrongPoolBatchUpdate()                          // 每日强势榜
+			task.StockDailyIndustryUpdate()                            // 每日行业-领涨股票
+			task.StockDailyConcept()                                   // 每日概念-领涨股票
+		}()
 	}
 
 	resp.Code = 200

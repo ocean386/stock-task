@@ -118,7 +118,7 @@ func StockDailyMarketUpdate(strBeginDate, strSecID, strCode string, klineType in
 	} else {
 		params.Add("beg", "20150101")
 	}
-	params.Add("end", "20250325")
+	params.Add("end", "20300101")
 	params.Add("lmt", "10000")
 	params.Add("_", fmt.Sprintf("%d", time.Now().UnixNano()/1e6))
 	fullUrl := fmt.Sprintf("%s?%s", strUrl, params.Encode())
