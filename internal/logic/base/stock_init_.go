@@ -21,18 +21,18 @@ import (
 func StockTask() {
 
 	//深圳A股(main-主板 nm-创业板)
-	GetStockListSZ("main")
+	GetStockListSZ("main", false)
 	time.Sleep(time.Second * 5)
-	GetStockListSZ("nm")
+	GetStockListSZ("nm", false)
 
 	//上海A股(1-主板 8-科创板)
 	for i := 1; i <= 8; i = i + 7 {
-		GetStockListSH(i)
+		GetStockListSH(i, false)
 		time.Sleep(time.Second * 5)
 	}
 
 	//北京A股
-	GetStockListBJ()
+	GetStockListBJ(false)
 
 	//更新股票归属行业 以及行业代码(数据来源-东方财富)
 	StockIndustryBatchUpdate()
@@ -45,6 +45,27 @@ func StockTask() {
 
 	// 初始化概念列表-A股
 	InitStockConceptList()
+}
+
+// A股名称列表
+func StockNameUpdate() {
+
+	//深圳A股(main-主板 nm-创业板)
+	GetStockListSZ("main", true)
+	time.Sleep(time.Second * 5)
+	GetStockListSZ("nm", true)
+
+	//上海A股(1-主板 8-科创板)
+	for i := 1; i <= 8; i = i + 7 {
+		GetStockListSH(i, true)
+		time.Sleep(time.Second * 5)
+	}
+
+	//北京A股
+	GetStockListBJ(true)
+
+	// 判断股票为次新股
+	IsStockNew()
 }
 
 // 更新个股为次新股
@@ -219,7 +240,7 @@ func GetStockIndustry(strSecID, strStockCode string) {
 }
 
 // GetStockListSZ HTTP Get 请求 深圳交易所-股票列表
-func GetStockListSZ(showType string) {
+func GetStockListSZ(showType string, bUpdate bool) {
 
 	strUrl := "https://www.szse.cn/api/report/ShowReport"
 	nMarketType := 2
@@ -285,22 +306,44 @@ func GetStockListSZ(showType string) {
 					continue
 				}
 
-				data := model.Stock{
-					StockCode:     stockCode,
-					StockName:     stockName,
-					Exchange:      1,                  //交易所(1-深圳,2-上海,3-北京)
-					MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-					IncreaseRange: fRange,
-					IsNewlyListed: 0,
-					ListingDate:   tDate,
-					CreatedAt:     time.Now(),
-					UpdatedAt:     time.Now(),
-				}
+				if bUpdate == false {
+					data := model.Stock{
+						StockCode:     stockCode,
+						StockName:     stockName,
+						Exchange:      1,                  //交易所(1-深圳,2-上海,3-北京)
+						MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
+						IncreaseRange: fRange,
+						IsNewlyListed: 0,
+						ListingDate:   tDate,
+						CreatedAt:     time.Now(),
+						UpdatedAt:     time.Now(),
+					}
 
-				err = dao.Stock.Save(&data)
-				if err != nil {
-					logx.Errorf("[深圳交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
-					return
+					err = dao.Stock.Save(&data)
+					if err != nil {
+						logx.Errorf("[深圳交易所-股票列表] [数据库]表[Stock] 操作[插入] 股票代码[%v]-error:%v", stockCode, err)
+						return
+					}
+				} else {
+					data, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).First()
+					if err != nil {
+						logx.Errorf("[深圳交易所-股票列表] [数据库]表[Stock] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+						return
+					}
+
+					if data.StockName != stockName {
+						data.StockName = stockName
+						data.UpdatedAt = time.Now()
+						if strings.Contains(stockName, "ST") {
+							data.IsStStock = 1
+						}
+
+						err = dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).Save(data)
+						if err != nil {
+							logx.Errorf("[深圳交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+							return
+						}
+					}
 				}
 			}
 		}
@@ -308,7 +351,7 @@ func GetStockListSZ(showType string) {
 }
 
 // GetStockList HTTP Get 请求 上海交易所-股票列表
-func GetStockListSH(stockType int) {
+func GetStockListSH(stockType int, bUpdate bool) {
 
 	strUrl := "https://query.sse.com.cn/sseQuery/commonQuery.do"
 	nMarketType := 3
@@ -390,27 +433,49 @@ func GetStockListSH(stockType int) {
 			continue
 		}
 
-		data := model.Stock{
-			StockCode:     stockCode,
-			StockName:     stockName,
-			Exchange:      2,                  //交易所(1-深圳,2-上海,3-北京)
-			MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-			IncreaseRange: fRange,
-			IsNewlyListed: 0,
-			ListingDate:   tDate,
-			CreatedAt:     time.Now(),
-			UpdatedAt:     time.Now(),
-		}
-		err = dao.Stock.Save(&data)
-		if err != nil {
-			logx.Errorf("[上海交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
-			return
+		if bUpdate == false {
+			data := model.Stock{
+				StockCode:     stockCode,
+				StockName:     stockName,
+				Exchange:      2,                  //交易所(1-深圳,2-上海,3-北京)
+				MarketType:    int64(nMarketType), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
+				IncreaseRange: fRange,
+				IsNewlyListed: 0,
+				ListingDate:   tDate,
+				CreatedAt:     time.Now(),
+				UpdatedAt:     time.Now(),
+			}
+			err = dao.Stock.Save(&data)
+			if err != nil {
+				logx.Errorf("[上海交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+		} else {
+			data, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).First()
+			if err != nil {
+				logx.Errorf("[上海交易所-股票列表] [数据库]表[Stock] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+
+			if data.StockName != stockName {
+				data.StockName = stockName
+				data.UpdatedAt = time.Now()
+				if strings.Contains(stockName, "ST") {
+					data.IsStStock = 1
+				}
+
+				err = dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).Save(data)
+				if err != nil {
+					logx.Errorf("[上海交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+					return
+				}
+			}
 		}
 	}
 }
 
 // GetStockListBJ HTTP Post 请求 北京交易所-股票列表
-func GetStockListBJ() {
+func GetStockListBJ(bUpdate bool) {
 
 	strUrl := "https://www.bse.cn/nqxxController/nqxxCnzq.do"
 	// 第一次请求获取总页数
@@ -503,21 +568,43 @@ func GetStockListBJ() {
 							continue
 						}
 
-						data := model.Stock{
-							StockCode:     stockCode,
-							StockName:     stockName,
-							Exchange:      3,        //交易所(1-深圳,2-上海,3-北京)
-							MarketType:    int64(4), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
-							IncreaseRange: 30,
-							IsNewlyListed: 0,
-							ListingDate:   tDate,
-							CreatedAt:     time.Now(),
-							UpdatedAt:     time.Now(),
-						}
-						err = dao.Stock.Save(&data)
-						if err != nil {
-							logx.Errorf("[北京交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
-							return
+						if bUpdate == false {
+							data := model.Stock{
+								StockCode:     stockCode,
+								StockName:     stockName,
+								Exchange:      3,        //交易所(1-深圳,2-上海,3-北京)
+								MarketType:    int64(4), //市场类别(1-主板10%,2-创业板20%,3-科创板20%,4-北交所30%)
+								IncreaseRange: 30,
+								IsNewlyListed: 0,
+								ListingDate:   tDate,
+								CreatedAt:     time.Now(),
+								UpdatedAt:     time.Now(),
+							}
+							err = dao.Stock.Save(&data)
+							if err != nil {
+								logx.Errorf("[北京交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+								return
+							}
+						} else {
+							data, err := dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).First()
+							if err != nil {
+								logx.Errorf("[北京交易所-股票列表] [数据库]表[Stock] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+								return
+							}
+
+							if data.StockName != stockName {
+								data.StockName = stockName
+								data.UpdatedAt = time.Now()
+								if strings.Contains(stockName, "ST") {
+									data.IsStStock = 1
+								}
+
+								err = dao.Stock.Where(dao.Stock.StockCode.Eq(stockCode)).Save(data)
+								if err != nil {
+									logx.Errorf("[北京交易所-股票列表] [数据库]表[Stock] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+									return
+								}
+							}
 						}
 					}
 				}

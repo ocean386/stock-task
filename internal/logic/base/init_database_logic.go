@@ -30,18 +30,6 @@ func (l *InitDatabaseLogic) InitDatabase() (resp *types.BaseMsgResp, err error) 
 
 	resp = &types.BaseMsgResp{}
 
-	//go task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
-	//go task.StockDailyMarketBatchUpdate() // 历史-日 周 月 K线行情数据
-	//go task.StockFundRankBatchUpdate() // 每日资金流向排名
-	//go task.StockTigerLeaderBatchUpdate(l.svcCtx.SnowFlakeWorker) // 每日龙虎榜
-	//go task.OrderChangeBatchUpdate(l.svcCtx) // 每日个股异动
-	//go task.StockHotRankUpdate() // 每日人气榜
-	//go task.StockDailyCommentBatchUpdate() // 每日股评
-	//go task.StockStrongPoolBatchUpdate() // 每日强势榜(涨停股 跌停股 炸板股 强势股)
-	//go task.StockDailyIndustryUpdate() // 每日行业-领涨股票
-	//go task.StockDailyConcept() // 每日概念-领涨股票
-	//go task.StockConceptListBatchUpdate()	// 更新概念的成份股列表
-
 	exists, err := l.svcCtx.Redis.ExistsCtx(l.ctx, "StockInit")
 	if err != nil {
 		logx.Errorf("[初始化数据] Failed to check Redis key existence: %v", err)

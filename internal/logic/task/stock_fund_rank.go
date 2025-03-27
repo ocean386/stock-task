@@ -150,13 +150,16 @@ func StockFundRankUpdate(pageIdx int64, tradeDate time.Time) (bStatus bool) {
 		superFund := decimal.NewFromFloat(cast.ToFloat64(itemMap["f66"]))    //超大单净流入(亿)
 		superPercent := decimal.NewFromFloat(cast.ToFloat64(itemMap["f69"])) //超大单净流入占比
 
+		mainFund = mainFund.DivRound(decimal.NewFromInt(100000000), 2)
+		superFund = superFund.DivRound(decimal.NewFromInt(100000000), 2)
+
 		sData := model.StockFundRank{
 			StockCode:    stockCode,
 			StockName:    stockName,
 			PlateType:    rData.PlateType,
-			MainFund:     mainFund.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
+			MainFund:     mainFund.InexactFloat64(),
 			MainPercent:  mainPercent.InexactFloat64(),
-			SuperFund:    superFund.DivRound(decimal.NewFromInt(100000000), 2).InexactFloat64(),
+			SuperFund:    superFund.InexactFloat64(),
 			SuperPercent: superPercent.InexactFloat64(),
 			FundSortID:   nSortID, //净流入排名
 			VolumeRatio:  volumeRatio.InexactFloat64(),

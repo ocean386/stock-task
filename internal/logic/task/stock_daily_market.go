@@ -26,7 +26,7 @@ func IsThisMonth(t time.Time) bool {
 }
 
 // 更新A股日K线行情数据-批量(每个交易日执行一次,每周六执行周期级别,每月1号执行月期级别)
-func StockDailyMarketBatchUpdate() {
+func StockDailyMarketBatchUpdate(klineType int64) {
 
 	stockList, err := dao.Stock.Where(dao.Stock.PlateType.In(1, 2, 3)).Find() //微盘,小盘,中盘
 	if err != nil {
@@ -36,63 +36,60 @@ func StockDailyMarketBatchUpdate() {
 
 	var (
 		marketData *model.StockDailyMarket
-		klineType  int64
 	)
-	for klineType < 3 {
-		for _, s := range stockList {
-			marketData, err = dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(s.StockCode), dao.StockDailyMarket.KlineType.Eq(klineType)).Order(dao.StockDailyMarket.TradingDate.Desc()).First()
-			if err != nil && err != gorm.ErrRecordNotFound {
-				logx.Errorf("[历史行情数据-A股] [数据库]表[StockDailyMarket] 操作[查询]-error:%s", err.Error())
-				return
-			}
 
-			var (
-				strBeginDate string
-				strSecID     string
-				strCode      string
-			)
-			if err == nil {
-				if IsToday(marketData.TradingDate) {
-					continue
-				}
-				if klineType == 0 { //日
-					marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 1)
-				} else if klineType == 1 { //周
-					marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 7)
-				} else { //月
-					marketData.TradingDate = marketData.TradingDate.AddDate(0, 1, 0)
-				}
-
-				strBeginDate = marketData.TradingDate.Format(time.DateOnly)
-				strBeginDate = strings.Replace(strBeginDate, "-", "", 2)
-
-				if IsToday(marketData.TradingDate) || IsThisMonth(marketData.TradingDate) {
-					continue
-				}
-			}
-
-			switch s.Exchange {
-			case 1:
-				strSecID = fmt.Sprintf("0.%v", s.StockCode)
-				strCode = "sz" + s.StockCode
-			case 2:
-				strSecID = fmt.Sprintf("1.%v", s.StockCode)
-				strCode = "sh" + s.StockCode
-			case 3:
-				strSecID = fmt.Sprintf("0.%v", s.StockCode)
-				strCode = "bj" + s.StockCode
-			}
-
-			if len(strSecID) == 0 {
-				continue
-			}
-
-			StockDailyMarketUpdate(strBeginDate, strSecID, strCode, klineType)
-			time.Sleep(time.Millisecond * 100)
+	for _, s := range stockList {
+		marketData, err = dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(s.StockCode), dao.StockDailyMarket.KlineType.Eq(klineType)).Order(dao.StockDailyMarket.TradingDate.Desc()).First()
+		if err != nil && err != gorm.ErrRecordNotFound {
+			logx.Errorf("[历史行情数据-A股] [数据库]表[StockDailyMarket] 操作[查询]-error:%s", err.Error())
+			return
 		}
 
-		klineType = klineType + 1
+		var (
+			strBeginDate string
+			strSecID     string
+			strCode      string
+		)
+		if err == nil {
+			if IsToday(marketData.TradingDate) {
+				continue
+			}
+			if klineType == 0 { //日
+				marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 1)
+			} else if klineType == 1 { //周
+				marketData.TradingDate = marketData.TradingDate.AddDate(0, 0, 7)
+			} else { //月
+				marketData.TradingDate = marketData.TradingDate.AddDate(0, 1, 0)
+			}
+
+			strBeginDate = marketData.TradingDate.Format(time.DateOnly)
+			strBeginDate = strings.Replace(strBeginDate, "-", "", 2)
+
+			if IsToday(marketData.TradingDate) || IsThisMonth(marketData.TradingDate) {
+				continue
+			}
+		}
+
+		switch s.Exchange {
+		case 1:
+			strSecID = fmt.Sprintf("0.%v", s.StockCode)
+			strCode = "sz" + s.StockCode
+		case 2:
+			strSecID = fmt.Sprintf("1.%v", s.StockCode)
+			strCode = "sh" + s.StockCode
+		case 3:
+			strSecID = fmt.Sprintf("0.%v", s.StockCode)
+			strCode = "bj" + s.StockCode
+		}
+
+		if len(strSecID) == 0 {
+			continue
+		}
+
+		StockDailyMarketUpdate(strBeginDate, strSecID, strCode, klineType)
+		time.Sleep(time.Millisecond * 100)
 	}
+
 }
 
 // 更新A股日K线 行情数据

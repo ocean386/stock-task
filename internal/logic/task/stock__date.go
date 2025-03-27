@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// 更新A股交易日期
+// 更新A股交易日期(每月15号更新下个月交易日期)
 func StockDateUpdate() {
 
 	// 构建请求参数

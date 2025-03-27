@@ -56,9 +56,66 @@ func main() {
 	)
 
 	//每月15号更新下个月交易日期
-	dCron.AddFunc("StockHTTP", "00 00 04 15 * *", func() {
+	dCron.AddFunc("StockDateUpdate", "00 00 04 15 * *", func() {
 		task.StockDateUpdate()
 	})
+	// 更新概念的成份股列表(每周六更新一次)
+	dCron.AddFunc("", "00 10 00 * * *", func() {
+		task.StockConceptListBatchUpdate()
+	})
+	//实时行情数据(每5分钟更新一次)
+	dCron.AddFunc("StockRealTimeMarketDataUpdate", "*/5 * * * * *", func() {
+		task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
+	})
+	// 历史-日K线行情数据
+	dCron.AddFunc("", "", func() {
+		task.StockDailyMarketBatchUpdate(0)
+	})
+	// 历史-周K线行情数据(每周六更新一次)
+	dCron.AddFunc("", "00 00 01 * * *", func() {
+		task.StockDailyMarketBatchUpdate(1)
+	})
+	// 历史-月K线行情数据(每月1号更新一次)
+	dCron.AddFunc("", "00 10 02 01 * *", func() {
+		task.StockDailyMarketBatchUpdate(2)
+	})
+	// 每日资金流向排名(每小时更新一次)
+	dCron.AddFunc("", "00 35 * * * *", func() {
+		task.StockFundRankBatchUpdate()
+	})
+	// 每日龙虎榜(每小时更新一次)
+	dCron.AddFunc("", "35 30 * * * *", func() {
+		task.StockTigerLeaderBatchUpdate(svcCtx.SnowFlakeWorker)
+	})
+	// 每日个股异动(每5分钟更新一次)
+	dCron.AddFunc("", "10 */5 * * * *", func() {
+		task.OrderChangeBatchUpdate(svcCtx)
+	})
+	// 每日人气榜(每5分钟更新一次)
+	dCron.AddFunc("", "20 */5 * * * *", func() {
+		task.StockHotRankUpdate()
+	})
+	// 每日股评(每小时更新一次)
+	dCron.AddFunc("", "30 30 * * * *", func() {
+		task.StockDailyCommentBatchUpdate()
+	})
+	// 每日强势榜(每5分钟更新一次)
+	dCron.AddFunc("", "30 */5 * * * *", func() {
+		task.StockStrongPoolBatchUpdate()
+	})
+	// 每日行业-领涨股票(每小时更新一次)
+	dCron.AddFunc("", "40 35 * * * *", func() {
+		task.StockDailyIndustryUpdate()
+	})
+	// 每日概念-领涨股票(每小时更新一次)
+	dCron.AddFunc("", "50 35 * * * *", func() {
+		task.StockDailyConcept()
+	})
+
+	//
+	//dCron.AddFunc("", "", func() {
+	//
+	//})
 
 	go dCron.Start()
 	handler.RegisterHandlers(server, svcCtx)
