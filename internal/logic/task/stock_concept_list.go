@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// 更新概念板块-成份股票(每个星期执行一次)
+// 更新概念板块-成份股票(每周六执行一次)
 func StockConceptListBatchUpdate() {
 
 	conceptSlice, err := dao.StockConcept.Find()
