@@ -68,8 +68,8 @@ func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
 
 		dateStock, ok := respData["data"].(map[string]interface{})
 		if !ok {
-			logx.Errorf("[更新盘口异动] 操作[data] error:不存在")
-			return
+			logx.Errorf("[更新盘口异动] 操作[data] 类型[%v] error:不存在", nType)
+			continue
 		}
 
 		dateList, ok := dateStock["allstock"].([]interface{})
@@ -153,7 +153,8 @@ func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
 			IndustryCode: rData.IndustryCode,
 			UpdatedAt:    time.Now(),
 		}
-		err = dao.StockOrderChange.Where(dao.StockOrderChange.StockCode.Eq(stockCode), dao.StockOrderChange.TradingDate.Eq(tradeDate.StockDate)).Save(orderData)
+		//err = dao.StockOrderChange.Where(dao.StockOrderChange.StockCode.Eq(stockCode), dao.StockOrderChange.TradingDate.Eq(tradeDate.StockDate)).Save(orderData)
+		err = dao.StockOrderChange.Save(orderData)
 		if err != nil {
 			logx.Errorf("[更新盘口异动] [数据库]表[StockOrderChange] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
 			return

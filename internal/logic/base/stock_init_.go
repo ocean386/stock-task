@@ -66,6 +66,33 @@ func StockNameUpdate() {
 
 	// 判断股票为次新股
 	IsStockNew()
+
+	// 删除ST股票
+	DeleteST()
+}
+
+func DeleteST() {
+
+	stockSlice, err := dao.Stock.Select(dao.Stock.StockCode).Where(dao.Stock.IsStStock.Eq(1)).Find()
+	if err != nil {
+		logx.Errorf("[清理ST股票数据] [数据库]表[Stock] 操作[查询]-error:%s", err.Error())
+		return
+	}
+
+	if len(stockSlice) == 0 {
+		return
+	}
+
+	var codeSlice []string
+	for _, s := range stockSlice {
+		codeSlice = append(codeSlice, s.StockCode)
+	}
+
+	_, err = dao.StockDailyMarket.Where(dao.StockTigerLeader.StockCode.In(codeSlice...)).Delete()
+	if err != nil {
+		logx.Errorf("[清理ST股票数据] [数据库]表[StockDailyMarket] 操作[删除]-error:%s", err.Error())
+		return
+	}
 }
 
 // 更新个股为次新股
