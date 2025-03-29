@@ -15,6 +15,7 @@ type StockDailyComment struct {
 	StockCode      string    `gorm:"column:stock_code;type:varchar(10);primaryKey;comment:股票代码" json:"stock_code"`                         // 股票代码
 	StockName      string    `gorm:"column:stock_name;type:varchar(10);not null;comment:股票名称" json:"stock_name"`                           // 股票名称
 	PlateType      int64     `gorm:"column:plate_type;type:tinyint(4);not null;comment:盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)" json:"plate_type"` // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	VolumeRatio    float64   `gorm:"column:volume_ratio;type:decimal(8,2);not null;default:0.00;comment:量比" json:"volume_ratio"`           // 量比
 	TurnoverRate   float64   `gorm:"column:turnover_rate;type:decimal(8,2);not null;default:0.00;comment:换手" json:"turnover_rate"`         // 换手
 	IncreaseRate   float64   `gorm:"column:increase_rate;type:decimal(8,2);not null;default:0.00;comment:涨幅" json:"increase_rate"`         // 涨幅
 	CurrentPrice   float64   `gorm:"column:current_price;type:decimal(8,2);not null;default:0.00;comment:现价" json:"current_price"`         // 现价

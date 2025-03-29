@@ -8,6 +8,7 @@ import (
 	"github.com/ocean386/stock-task/internal/orm/model"
 	"github.com/shopspring/decimal"
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -28,7 +29,7 @@ func StockTigerLeaderBatchUpdate(SnowFlakeWorker *snowflake.SnowFlakeIdWorker) {
 	for nType < 2 {
 		StockTigerLeaderUpdate(nType, tradeDate.StockDate, SnowFlakeWorker) //净额
 		nType = nType + 1
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 	}
 
 	StockTigerLeaderRebuild(tradeDate.StockDate)
@@ -198,6 +199,22 @@ func StockTigerLeaderUpdate(nType int64, tradeDate time.Time, SnowFlakeWorker *s
 		} else {
 			tData.IsOrg = 1
 			tData.OrgTlabel = strTlabel
+		}
+
+		stockData, err := dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(stockCode), dao.StockDailyMarket.TradingDate.Eq(tradeDate)).First()
+		if err != nil && err != gorm.ErrRecordNotFound {
+			logx.Errorf("[更新个股人气榜] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+			return
+		}
+		if stockData != nil {
+			tData.VolumeRatio = stockData.VolumeRatio   //量比
+			tData.TurnoverRate = stockData.TurnoverRate //换手率
+			//tData.IncreaseRate = stockData.IncreaseRate //涨幅
+			tData.Amplitude = stockData.Amplitude       //振幅
+			tData.CurrentPrice = stockData.CurrentPrice //现价
+			tData.OpeningPrice = stockData.OpeningPrice //开盘
+			tData.HighestPrice = stockData.HighestPrice //最高
+			tData.LowestPrice = stockData.LowestPrice   //最低
 		}
 
 		err = dao.StockTigerLeader.Save(&tData)

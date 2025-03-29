@@ -102,25 +102,29 @@ func main() {
 	// 实时行情数据(每5分钟更新一次)
 	dCron.AddFunc("StockRealTimeMarketDataUpdate", "05 */5 * * * *",
 		WithTradeTimeCheck("StockRealTimeMarketDataUpdate", func() {
-			task.StockRealTimeMarketDataBatchUpdate(1) // 0-流通市值 1-实时行情数据
+			task.StockRealTimeMarketDataBatchUpdate(svcCtx.Redis, 1) // 0-流通市值 1-实时行情数据
 		}),
 	)
 
 	// 每日强势榜(每5分钟更新一次)
 	dCron.AddFunc("StockStrongPoolUpdate", "10 */5 * * * *",
-		WithTradeTimeCheck("StockStrongPoolUpdate", task.StockStrongPoolBatchUpdate),
+		WithTradeTimeCheck("StockStrongPoolUpdate", func() {
+			task.StockStrongPoolBatchUpdate(svcCtx.Redis)
+		}),
 	)
 
 	// 每日个股异动(每5分钟更新一次)
 	dCron.AddFunc("OrderChangeUpdate", "20 */5 * * * *",
 		WithTradeTimeCheck("OrderChangeUpdate", func() {
-			task.OrderChangeBatchUpdate(svcCtx)
+			task.OrderChangeBatchUpdate(svcCtx.Redis)
 		}),
 	)
 
 	// 每日人气榜(每5分钟更新一次)
 	dCron.AddFunc("StockHotRankUpdate", "30 */5 * * * *",
-		WithTradeTimeCheck("StockHotRankUpdate", task.StockHotRankUpdate),
+		WithTradeTimeCheck("StockHotRankUpdate", func() {
+			task.StockHotRankUpdate(svcCtx.Redis)
+		}),
 	)
 
 	// 每日资金流向排名(每小时更新一次)
@@ -140,7 +144,9 @@ func main() {
 
 	// 每日股评(每小时更新一次)
 	dCron.AddFunc("StockDailyCommentUpdate", "20 35 * * * *",
-		WithTradeTimeCheck("StockDailyCommentUpdate", task.StockDailyCommentBatchUpdate),
+		WithTradeTimeCheck("StockDailyCommentUpdate", func() {
+			task.StockDailyCommentBatchUpdate(svcCtx.Redis)
+		}),
 	)
 
 	go dCron.Start()

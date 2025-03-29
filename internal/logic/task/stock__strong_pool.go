@@ -8,13 +8,15 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"gorm.io/gorm"
 	"net/http"
 	"net/url"
 	"time"
 )
 
 // 更新每日强势榜-批量 强势榜(涨停股,跌停股,炸板股,强势股)
-func StockStrongPoolBatchUpdate() {
+func StockStrongPoolBatchUpdate(redisClient *redis.Redis) {
 	var (
 		bStatus bool
 		strType string
@@ -46,7 +48,7 @@ func StockStrongPoolBatchUpdate() {
 		strType = mapType[idx]
 		strSort = mapSort[idx]
 		idx = idx + 1
-		bStatus = StockStrongPoolUpdate(strType, strSort, idx, tradeDate.StockDate)
+		bStatus = StockStrongPoolUpdate(redisClient, strType, strSort, idx, tradeDate.StockDate)
 		time.Sleep(time.Millisecond * 100)
 	}
 
@@ -54,7 +56,7 @@ func StockStrongPoolBatchUpdate() {
 }
 
 // 强势榜(涨停股,跌停股,炸板股,强势股)
-func StockStrongPoolUpdate(strType, strSort string, nType int64, tradeDate time.Time) (bStatus bool) {
+func StockStrongPoolUpdate(redisClient *redis.Redis, strType, strSort string, nType int64, tradeDate time.Time) (bStatus bool) {
 
 	strUrl := fmt.Sprintf("https://push2ex.eastmoney.com/%s", strType)
 	params := url.Values{}
@@ -219,11 +221,40 @@ func StockStrongPoolUpdate(strType, strSort string, nType int64, tradeDate time.
 		circulatingMarketValue = circulatingMarketValue.DivRound(decimal.NewFromInt(100000000), 2)
 		fund = fund.DivRound(decimal.NewFromInt(100000000), 2)
 
+		var (
+			volumeRatio float64 //量比
+		)
+		strByte, err := redisClient.Hget(fmt.Sprintf("StockDailyMarket:%v", stockCode), "RealTime")
+		if err != nil && err != redis.Nil {
+			logx.Errorf("[更新每日强势榜] [Redis]Key[StockDailyMarket] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+			return
+		}
+
+		if err == redis.Nil {
+			stockData, err := dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(stockCode), dao.StockDailyMarket.TradingDate.Eq(tradeDate)).First()
+			if err != nil && err != gorm.ErrRecordNotFound {
+				logx.Errorf("[更新每日强势榜] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+			if stockData != nil {
+				volumeRatio = stockData.VolumeRatio
+			}
+		} else {
+			var stockData model.StockDailyMarket
+			err = internalHttp.JsonUnmarshal([]byte(strByte), &stockData)
+			if err != nil {
+				logx.Errorf("[更新每日强势榜] 操作[JsonUnmarshal] 股票代码[%v]-error:%s", stockCode, err.Error())
+				return
+			}
+			volumeRatio = stockData.VolumeRatio
+		}
+
 		stock := model.StockStrong{
 			StockCode:                    stockCode,
 			StockName:                    rData.StockName,
 			CirculatingMarketValue:       circulatingMarketValue.InexactFloat64(), //流通市值
 			PlateType:                    rData.PlateType,
+			VolumeRatio:                  volumeRatio,                                    //量比
 			TurnoverRate:                 turnoverRate.Round(2).InexactFloat64(),         //换手率
 			IncreaseRate:                 increaseRate.Round(2).InexactFloat64(),         //涨幅
 			CurrentPrice:                 currentPrice.InexactFloat64(),                  //最新价格
@@ -246,7 +277,6 @@ func StockStrongPoolUpdate(strType, strSort string, nType int64, tradeDate time.
 			logx.Errorf("[更新每日强势榜] [数据库]表[StockStrong] 操作[保存] 股票代码[%v]-error:%v", stock.StockCode, err)
 			return
 		}
-
 	}
 
 	if nType == 4 {

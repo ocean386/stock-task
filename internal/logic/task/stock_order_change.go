@@ -5,9 +5,10 @@ import (
 	internalHttp "github.com/ocean386/common/http"
 	"github.com/ocean386/stock-task/internal/orm/dao"
 	"github.com/ocean386/stock-task/internal/orm/model"
-	"github.com/ocean386/stock-task/internal/svc"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"gorm.io/gorm"
 	"net/http"
 	"net/url"
 	"strings"
@@ -15,7 +16,7 @@ import (
 )
 
 // 更新盘口异动信息(每个交易日执行一次)
-func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
+func OrderChangeBatchUpdate(redisClient *redis.Redis) {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()
 	if err != nil {
@@ -115,7 +116,6 @@ func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
 				stockCodeMap[stockCode] = make(map[string]string)
 			}
 
-			//stockCodeMap[stockCode][timeFormat] = fmt.Sprintf("%s-%s[股价:%.2f]", strMsg, timeFormat, cast.ToFloat64(infoSlice[1]))
 			stockCodeMap[stockCode][timeFormat] = fmt.Sprintf("%s-%s", strMsg, timeFormat)
 		}
 
@@ -153,7 +153,38 @@ func OrderChangeBatchUpdate(svcCtx *svc.ServiceContext) {
 			IndustryCode: rData.IndustryCode,
 			UpdatedAt:    time.Now(),
 		}
-		//err = dao.StockOrderChange.Where(dao.StockOrderChange.StockCode.Eq(stockCode), dao.StockOrderChange.TradingDate.Eq(tradeDate.StockDate)).Save(orderData)
+
+		strByte, err := redisClient.Hget(fmt.Sprintf("StockDailyMarket:%v", stockCode), "RealTime")
+		if err != nil && err != redis.Nil {
+			logx.Errorf("[更新盘口异动] [Redis]Key[StockDailyMarket] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+			return
+		}
+
+		if err == redis.Nil {
+			stockData, err := dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(stockCode), dao.StockDailyMarket.TradingDate.Eq(tradeDate.StockDate)).First()
+			if err != nil && err != gorm.ErrRecordNotFound {
+				logx.Errorf("[更新盘口异动] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+			if stockData != nil {
+				orderData.VolumeRatio = stockData.VolumeRatio   //量比
+				orderData.TurnoverRate = stockData.TurnoverRate //换手率
+				orderData.IncreaseRate = stockData.IncreaseRate //涨幅
+				orderData.CurrentPrice = stockData.CurrentPrice
+			}
+		} else {
+			var stockData model.StockDailyMarket
+			err = internalHttp.JsonUnmarshal([]byte(strByte), &stockData)
+			if err != nil {
+				logx.Errorf("[更新盘口异动] 操作[JsonUnmarshal] 股票代码[%v]-error:%s", stockCode, err.Error())
+				return
+			}
+			orderData.VolumeRatio = stockData.VolumeRatio
+			orderData.TurnoverRate = stockData.TurnoverRate
+			orderData.IncreaseRate = stockData.IncreaseRate
+			orderData.CurrentPrice = stockData.CurrentPrice
+		}
+
 		err = dao.StockOrderChange.Save(orderData)
 		if err != nil {
 			logx.Errorf("[更新盘口异动] [数据库]表[StockOrderChange] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)

@@ -1,18 +1,21 @@
 package task
 
 import (
+	"fmt"
 	internalHttp "github.com/ocean386/common/http"
 	"github.com/ocean386/stock-task/internal/orm/dao"
 	"github.com/ocean386/stock-task/internal/orm/model"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"gorm.io/gorm"
 	"net/http"
 	"strings"
 	"time"
 )
 
 // 更新个股人气榜-100名(每个交易日执行一次)
-func StockHotRankUpdate() {
+func StockHotRankUpdate(redisClient *redis.Redis) {
 
 	tradeDate, err := dao.StockDate.Where(dao.StockDate.StockDate.Lte(time.Now())).Order(dao.StockDate.StockDate.Desc()).First()
 	if err != nil {
@@ -105,6 +108,37 @@ func StockHotRankUpdate() {
 			Industry:        rData.Industry,
 			IndustryCode:    rData.IndustryCode,
 			UpdatedAt:       time.Now(),
+		}
+
+		strByte, err := redisClient.Hget(fmt.Sprintf("StockDailyMarket:%v", stockCode), "RealTime")
+		if err != nil && err != redis.Nil {
+			logx.Errorf("[更新个股人气榜] [Redis]Key[StockDailyMarket] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+			return
+		}
+
+		if err == redis.Nil {
+			stockData, err := dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(stockCode), dao.StockDailyMarket.TradingDate.Eq(tradeDate.StockDate)).First()
+			if err != nil && err != gorm.ErrRecordNotFound {
+				logx.Errorf("[更新个股人气榜] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+			if stockData != nil {
+				rankData.VolumeRatio = stockData.VolumeRatio   //量比
+				rankData.TurnoverRate = stockData.TurnoverRate //换手率
+				rankData.IncreaseRate = stockData.IncreaseRate //涨幅
+				rankData.CurrentPrice = stockData.CurrentPrice
+			}
+		} else {
+			var stockData model.StockDailyMarket
+			err = internalHttp.JsonUnmarshal([]byte(strByte), &stockData)
+			if err != nil {
+				logx.Errorf("[更新个股人气榜] 操作[JsonUnmarshal] 股票代码[%v]-error:%s", stockCode, err.Error())
+				return
+			}
+			rankData.VolumeRatio = stockData.VolumeRatio
+			rankData.TurnoverRate = stockData.TurnoverRate
+			rankData.IncreaseRate = stockData.IncreaseRate
+			rankData.CurrentPrice = stockData.CurrentPrice
 		}
 
 		if err := dao.StockHotRank.Save(&rankData); err != nil {

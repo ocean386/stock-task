@@ -30,6 +30,7 @@ func newStockDailyComment(db *gorm.DB, opts ...gen.DOOption) stockDailyComment {
 	_stockDailyComment.StockCode = field.NewString(tableName, "stock_code")
 	_stockDailyComment.StockName = field.NewString(tableName, "stock_name")
 	_stockDailyComment.PlateType = field.NewInt64(tableName, "plate_type")
+	_stockDailyComment.VolumeRatio = field.NewFloat64(tableName, "volume_ratio")
 	_stockDailyComment.TurnoverRate = field.NewFloat64(tableName, "turnover_rate")
 	_stockDailyComment.IncreaseRate = field.NewFloat64(tableName, "increase_rate")
 	_stockDailyComment.CurrentPrice = field.NewFloat64(tableName, "current_price")
@@ -56,6 +57,7 @@ type stockDailyComment struct {
 	StockCode      field.String  // 股票代码
 	StockName      field.String  // 股票名称
 	PlateType      field.Int64   // 盘股类型(0-全部,1-微小盘,2-小盘,3-中盘,4-大盘)
+	VolumeRatio    field.Float64 // 量比
 	TurnoverRate   field.Float64 // 换手
 	IncreaseRate   field.Float64 // 涨幅
 	CurrentPrice   field.Float64 // 现价
@@ -87,6 +89,7 @@ func (s *stockDailyComment) updateTableName(table string) *stockDailyComment {
 	s.StockCode = field.NewString(table, "stock_code")
 	s.StockName = field.NewString(table, "stock_name")
 	s.PlateType = field.NewInt64(table, "plate_type")
+	s.VolumeRatio = field.NewFloat64(table, "volume_ratio")
 	s.TurnoverRate = field.NewFloat64(table, "turnover_rate")
 	s.IncreaseRate = field.NewFloat64(table, "increase_rate")
 	s.CurrentPrice = field.NewFloat64(table, "current_price")
@@ -115,10 +118,11 @@ func (s *stockDailyComment) GetFieldByName(fieldName string) (field.OrderExpr, b
 }
 
 func (s *stockDailyComment) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 15)
+	s.fieldMap = make(map[string]field.Expr, 16)
 	s.fieldMap["stock_code"] = s.StockCode
 	s.fieldMap["stock_name"] = s.StockName
 	s.fieldMap["plate_type"] = s.PlateType
+	s.fieldMap["volume_ratio"] = s.VolumeRatio
 	s.fieldMap["turnover_rate"] = s.TurnoverRate
 	s.fieldMap["increase_rate"] = s.IncreaseRate
 	s.fieldMap["current_price"] = s.CurrentPrice

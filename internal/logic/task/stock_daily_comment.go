@@ -8,13 +8,15 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"gorm.io/gorm"
 	"net/http"
 	"net/url"
 	"time"
 )
 
 // 更新A股每日股评-批量(每个交易日执行一次)
-func StockDailyCommentBatchUpdate() {
+func StockDailyCommentBatchUpdate(redisClient *redis.Redis) {
 
 	var (
 		bStatus bool
@@ -29,7 +31,7 @@ func StockDailyCommentBatchUpdate() {
 
 	for bStatus == true {
 		idx = idx + 1
-		bStatus = StockDailyCommentUpdate(idx, tradeDate.StockDate)
+		bStatus = StockDailyCommentUpdate(redisClient, idx, tradeDate.StockDate)
 		time.Sleep(time.Millisecond * 100)
 	}
 
@@ -37,7 +39,7 @@ func StockDailyCommentBatchUpdate() {
 }
 
 // 更新每日股评
-func StockDailyCommentUpdate(idx int, tradeDate time.Time) (bStatus bool) {
+func StockDailyCommentUpdate(redisClient *redis.Redis, idx int, tradeDate time.Time) (bStatus bool) {
 
 	strUrl := "https://datacenter-web.eastmoney.com/api/data/v1/get"
 	params := url.Values{}
@@ -134,6 +136,32 @@ func StockDailyCommentUpdate(idx int, tradeDate time.Time) (bStatus bool) {
 			TradingDate:    tradeDate,
 			UpdatedAt:      time.Now(),
 		}
+
+		strByte, err := redisClient.Hget(fmt.Sprintf("StockDailyMarket:%v", stockCode), "RealTime")
+		if err != nil && err != redis.Nil {
+			logx.Errorf("[每日股评-A股] [Redis]Key[StockDailyMarket] 操作[查询] 股票代码[%v]-error:%v", stockCode, err)
+			return
+		}
+
+		if err == redis.Nil {
+			stockData, err := dao.StockDailyMarket.Where(dao.StockDailyMarket.StockCode.Eq(stockCode), dao.StockDailyMarket.TradingDate.Eq(tradeDate)).First()
+			if err != nil && err != gorm.ErrRecordNotFound {
+				logx.Errorf("[每日股评-A股] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				return
+			}
+			if stockData != nil {
+				mData.VolumeRatio = stockData.VolumeRatio //量比
+			}
+		} else {
+			var stockData model.StockDailyMarket
+			err = internalHttp.JsonUnmarshal([]byte(strByte), &stockData)
+			if err != nil {
+				logx.Errorf("[每日股评-A股] 操作[JsonUnmarshal] 股票代码[%v]-error:%s", stockCode, err.Error())
+				return
+			}
+			mData.VolumeRatio = stockData.VolumeRatio
+		}
+
 		err = dao.StockDailyComment.Save(&mData)
 		if err != nil {
 			logx.Errorf("[每日股评-A股] [数据库]表[StockDailyComment] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)

@@ -8,13 +8,14 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"net/http"
 	"net/url"
 	"time"
 )
 
 // 更新A股实时行情数据-批量(交易日-每5分钟 执行一次)
-func StockRealTimeMarketDataBatchUpdate(nType int) {
+func StockRealTimeMarketDataBatchUpdate(redisClient *redis.Redis, nType int) {
 
 	var (
 		bStatus bool
@@ -30,7 +31,7 @@ func StockRealTimeMarketDataBatchUpdate(nType int) {
 	// nType: 0-流通市值 1-实时行情数据
 	for bStatus == true {
 		idx = idx + 1
-		bStatus = StockRealTimeMarketDataUpdate(idx, nType, tradeDate.StockDate)
+		bStatus = StockRealTimeMarketDataUpdate(redisClient, idx, nType, tradeDate.StockDate)
 		time.Sleep(time.Millisecond * 100)
 	}
 
@@ -38,7 +39,7 @@ func StockRealTimeMarketDataBatchUpdate(nType int) {
 }
 
 // 更新A股实时行情数据
-func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus bool) {
+func StockRealTimeMarketDataUpdate(redisClient *redis.Redis, idx, nType int, tradeDate time.Time) (bStatus bool) {
 
 	strUrl := "https://push2.eastmoney.com/api/qt/clist/get"
 	params := url.Values{}
@@ -95,6 +96,9 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 		return
 	}
 
+	now := time.Now()
+	endPM := time.Date(now.Year(), now.Month(), now.Day(), 15, 0, 55, 0, now.Location())
+
 	// 解析所需字段并更新到数据库
 	for _, item := range diff {
 		itemMap, ok := item.(map[string]interface{})
@@ -142,9 +146,17 @@ func StockRealTimeMarketDataUpdate(idx, nType int, tradeDate time.Time) (bStatus
 				KlineType:    0, //K线类型(0-日K线,1-周K线,2-月K线)
 				TradingDate:  tradeDate,
 			}
-			err = dao.StockDailyMarket.Save(&mData)
+			if now.After(endPM) {
+				err = dao.StockDailyMarket.Save(&mData)
+				if err != nil {
+					logx.Errorf("[实时行情数据-A股] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+					return
+				}
+			}
+			jsonData, _ := internalHttp.JsonMarshal(mData)
+			err = redisClient.Hset(fmt.Sprintf("StockDailyMarket:%v", stockCode), "RealTime", string(jsonData))
 			if err != nil {
-				logx.Errorf("[实时行情数据-A股] [数据库]表[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
+				logx.Errorf("[实时行情数据-A股] [Redis]Key[StockDailyMarket] 操作[更新] 股票代码[%v]-error:%v", stockCode, err)
 				return
 			}
 		} else {
